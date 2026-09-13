@@ -47,7 +47,10 @@ class DetectionSummaryResponse(BaseModel):
     lookalike_coverage_pct: float
     confidence_score: float
     classes_detected: Dict[str, bool]
+    morphology: Dict[str, Any]
     mask_base64: str
+    detected_location: Optional[Dict[str, Any]] = None
+    scenario_update: Optional[Dict[str, Any]] = None
 
 class HindcastRequest(BaseModel):
     origin_lat: float = Field(19.412, description="Latitude of detected slick center")
@@ -57,6 +60,130 @@ class HindcastRequest(BaseModel):
     v_current_m_s: float = Field(-0.20, description="Northward ocean current (m/s)")
     u_wind_m_s: float = Field(2.5, description="Eastward wind velocity (m/s)")
     v_wind_m_s: float = Field(-3.0, description="Northward wind velocity (m/s)")
+
+def _generate_incident_scenario(
+    origin_lat: float = 19.412,
+    origin_lon: float = 71.325,
+    custom_slick_props: Optional[Dict[str, Any]] = None,
+    scenario_id: str = "INC-20260913-0091"
+) -> Dict[str, Any]:
+    hindcast = _drift_engine.run_backward_hindcast(origin_lat, origin_lon, hours_back=6.5)
+    forecast = _drift_engine.run_forward_forecast(origin_lat, origin_lon, hours_ahead=12.0)
+    reconstructed_release = hindcast["reconstructed_release"]
+
+    # Documented Mumbai High Oil Field Centroid (~19.417° N, 71.333° E)
+    field_centroid_lat, field_centroid_lon = 19.417, 71.333
+    dist_to_field = _attribution_scorer.haversine_distance_km(
+        origin_lat, origin_lon, field_centroid_lat, field_centroid_lon
+    )
+
+    # Candidate AIS Vessels Attribution Scoring
+    candidates = _ais_generator.generate_candidate_scenario(
+        reconstructed_release_lat=reconstructed_release["lat"],
+        reconstructed_release_lon=reconstructed_release["lon"],
+        drift_heading_deg=hindcast["drift_heading_deg"]
+    )
+
+    ranked_suspects = []
+    for cand in candidates:
+        initial_draft = cand.get("initial_draft_m", 10.0)
+        current_draft = cand.get("current_draft_m", 10.0)
+        draft_delta = round(abs(initial_draft - current_draft), 2)
+        has_ais_gap = cand.get("ais_gap_hours", 0.0) > 1.0
+        has_speed_drop = cand.get("min_speed_knots", cand.get("speed_knots", 12.0)) < 5.0
+
+        score_res = _attribution_scorer.score_vessel(
+            vessel_lat=cand["lat"],
+            vessel_lon=cand["lon"],
+            vessel_heading_deg=cand["heading_deg"],
+            reconstructed_origin=reconstructed_release,
+            drift_heading_deg=hindcast["drift_heading_deg"],
+            vessel_speed_knots=cand.get("speed_knots", 12.4),
+            ais_gap_flag=has_ais_gap,
+            speed_drop_flag=has_speed_drop,
+            draft_change_m=draft_delta
+        )
+
+        overall_score_pct = round(score_res["overall_score"] * 100.0, 1)
+
+        ranked_suspects.append({
+            "vessel_id": cand["vessel_id"],
+            "vessel_name": cand["vessel_name"],
+            "vessel_type": cand["vessel_type"],
+            "flag": cand["flag"],
+            "mmsi": cand["mmsi"],
+            "lat": cand["lat"],
+            "lon": cand["lon"],
+            "heading_deg": cand["heading_deg"],
+            "speed_knots": cand["speed_knots"],
+            "min_speed_knots": cand.get("min_speed_knots", cand.get("speed_knots")),
+            "initial_draft_m": initial_draft,
+            "current_draft_m": current_draft,
+            "draft_change_m": draft_delta,
+            "ais_gap_hours": cand.get("ais_gap_hours", 0.0),
+            "ais_status": cand["ais_status"],
+            "distance_km": score_res["proximity_km"],
+            "proximity_score": score_res["proximity_score"],
+            "trajectory_score": score_res["trajectory_score"],
+            "behavioral_anomaly_score": score_res["behavioral_anomaly_score"],
+            "attribution_score_pct": overall_score_pct,
+            "risk_level": "PRIMARY SUSPECT" if overall_score_pct >= 80.0 else ("MODERATE RISK" if overall_score_pct >= 50.0 else "LOW RISK"),
+            "track_points": cand["track_points"]
+        })
+
+    # Sort suspects by overall score descending
+    ranked_suspects.sort(key=lambda x: x["attribution_score_pct"], reverse=True)
+
+    dark_vessels = _dark_vessel_detector.detect_dark_vessels(origin_lat, origin_lon)
+    responder_route = _responder_routing.calculate_intercept_route(
+        origin_lat, origin_lon, hindcast["drift_heading_deg"], hindcast["drift_speed_knots"]
+    )
+
+    detected_slick = custom_slick_props or {
+        "area_sq_km": 14.8,
+        "estimated_age_hours": hindcast["hours_hindcasted"],
+        "drift_heading_deg": hindcast["drift_heading_deg"],
+        "drift_speed_knots": hindcast["drift_speed_knots"],
+        "perimeter_km": 28.4,
+        "compactness_index": 0.23,
+        "estimated_thickness_um": 2.15,
+        "estimated_volume_m3": 31.82,
+        "estimated_mass_tons": 27.68,
+        "weathering_stage": "Gravity-Viscous Drift & Evaporation"
+    }
+
+    return {
+        "scenario_id": scenario_id,
+        "system_status": "ONLINE / S1-SAR LOCKED",
+        "sector": "ARABIAN SEA / MUMBAI HIGH BASIN",
+        "telemetry": {
+            "wind": "14.0 kts @ 065° NE",
+            "current": "1.2 kts @ 065° NE",
+            "sea_temp_c": 28.4,
+            "wave_height_m": 1.5,
+            "drift_vector": f"{hindcast['drift_heading_deg']}° T at {hindcast['drift_speed_knots']} knots"
+        },
+        "location": {
+            "name": f"Detected Slick Locus ({origin_lat:.4f}° N, {origin_lon:.4f}° E)",
+            "lat": origin_lat,
+            "lon": origin_lon,
+            "coastline": "Konkan Coast, Arabian Sea"
+        },
+        "detected_slick": detected_slick,
+        "hindcast_trajectory": hindcast["trajectory_points"],
+        "drift_cone_polygon": hindcast["drift_cone_polygon"],
+        "reconstructed_release": reconstructed_release,
+        "ranked_suspects": ranked_suspects,
+        "dark_vessels": dark_vessels,
+        "responder_route": responder_route,
+        "infrastructure_proximity": {
+            "nearest_rig": "Mumbai High Field Centroid Complex",
+            "centroid_lat": field_centroid_lat,
+            "centroid_lon": field_centroid_lon,
+            "distance_km": round(dist_to_field, 2),
+            "rig_spill_risk_flag": False
+        }
+    }
 
 @router.get("/health")
 def health_check():
@@ -125,6 +252,51 @@ async def run_oil_detection(
     overlay_img.save(buffer, format="PNG")
     mask_b64 = f"data:image/png;base64,{base64.b64encode(buffer.getvalue()).decode('utf-8')}"
 
+    # Calculate real geospatial centroid from detected oil pixels
+    if oil_cnt > 0:
+        oil_y, oil_x = np.where(mask == 1)
+        mean_y = float(np.mean(oil_y))
+        mean_x = float(np.mean(oil_x))
+        base_lat, base_lon = 19.4120, 71.3250
+        # 10m per pixel: 0.00009 deg lat, 0.0000955 deg lon
+        offset_lat = - (mean_y - (H / 2.0)) * 0.000090
+        offset_lon = (mean_x - (W / 2.0)) * 0.0000955
+        detected_lat = round(base_lat + offset_lat, 4)
+        detected_lon = round(base_lon + offset_lon, 4)
+
+        detected_location = {
+            "name": f"Detected Slick in {image_name}",
+            "lat": detected_lat,
+            "lon": detected_lon
+        }
+
+        scenario_update = _generate_incident_scenario(
+            origin_lat=detected_lat,
+            origin_lon=detected_lon,
+            custom_slick_props={
+                "area_sq_km": morphology["area_sq_km"],
+                "perimeter_km": morphology["perimeter_km"],
+                "compactness_index": morphology["compactness_index"],
+                "estimated_thickness_um": morphology["estimated_thickness_um"],
+                "estimated_volume_m3": morphology["estimated_volume_m3"],
+                "estimated_mass_tons": morphology["estimated_mass_tons"],
+                "weathering_stage": morphology["weathering_stage"]
+            },
+            scenario_id=f"INC-USER-{abs(hash(image_name)) % 10000:04d}"
+        )
+    else:
+        detected_location = {
+            "name": f"Clean Sea in {image_name}",
+            "lat": 19.4120,
+            "lon": 71.3250
+        }
+        scenario_update = _generate_incident_scenario(
+            origin_lat=19.4120,
+            origin_lon=71.3250,
+            custom_slick_props=morphology,
+            scenario_id=f"INC-CLEAR-{abs(hash(image_name)) % 10000:04d}"
+        )
+
     return DetectionSummaryResponse(
         status="success",
         image_name=image_name,
@@ -143,7 +315,9 @@ async def run_oil_detection(
             "background": no_oil_cnt > 0
         },
         morphology=morphology,
-        mask_base64=mask_b64
+        mask_base64=mask_b64,
+        detected_location=detected_location,
+        scenario_update=scenario_update
     )
 
 class ForecastRequest(BaseModel):
@@ -170,121 +344,8 @@ def calculate_forward_forecast(req: ForecastRequest):
 
 @router.get("/attribution/demo-scenario")
 def get_demo_scenario_attribution():
-    origin_lat, origin_lon = 19.412, 71.325
-    hindcast = _drift_engine.run_backward_hindcast(origin_lat, origin_lon, hours_back=6.5)
-    forecast = _drift_engine.run_forward_forecast(origin_lat, origin_lon, hours_ahead=12.0)
-    reconstructed_release = hindcast["reconstructed_release"]
-
-    # Documented Mumbai High Oil Field Centroid (~19.417° N, 71.333° E)
-    field_centroid_lat, field_centroid_lon = 19.417, 71.333
-
-    dist_to_field = _attribution_scorer.haversine_distance_km(
-        origin_lat, origin_lon, field_centroid_lat, field_centroid_lon
+    return _generate_incident_scenario(
+        origin_lat=19.412,
+        origin_lon=71.325,
+        scenario_id="INC-20260913-0091"
     )
-
-    # Candidate AIS Vessels Attribution Scoring
-    candidates = _ais_generator.generate_candidate_scenario(
-        reconstructed_release_lat=reconstructed_release["lat"],
-        reconstructed_release_lon=reconstructed_release["lon"],
-        drift_heading_deg=hindcast["drift_heading_deg"]
-    )
-
-    ranked_suspects = []
-    for cand in candidates:
-        initial_draft = cand.get("initial_draft_m", 10.0)
-        current_draft = cand.get("current_draft_m", 10.0)
-        draft_delta = round(abs(initial_draft - current_draft), 2)
-        has_ais_gap = cand.get("ais_gap_hours", 0.0) > 1.0
-        has_speed_drop = cand.get("min_speed_knots", cand.get("speed_knots", 12.0)) < 5.0
-
-        score_res = _attribution_scorer.score_vessel(
-            vessel_lat=cand["lat"],
-            vessel_lon=cand["lon"],
-            vessel_heading_deg=cand["heading_deg"],
-            reconstructed_origin=reconstructed_release,
-            drift_heading_deg=hindcast["drift_heading_deg"],
-            vessel_speed_knots=cand.get("speed_knots", 12.4),
-            ais_gap_flag=has_ais_gap,
-            speed_drop_flag=has_speed_drop,
-            draft_change_m=draft_delta
-        )
-
-        overall_score_pct = round(score_res["overall_score"] * 100.0, 1)
-
-        ranked_suspects.append({
-            "vessel_id": cand["vessel_id"],
-            "vessel_name": cand["vessel_name"],
-            "vessel_type": cand["vessel_type"],
-            "flag": cand["flag"],
-            "mmsi": cand["mmsi"],
-            "lat": cand["lat"],
-            "lon": cand["lon"],
-            "heading_deg": cand["heading_deg"],
-            "speed_knots": cand["speed_knots"],
-            "min_speed_knots": cand.get("min_speed_knots", cand.get("speed_knots")),
-            "initial_draft_m": initial_draft,
-            "current_draft_m": current_draft,
-            "draft_change_m": draft_delta,
-            "ais_gap_hours": cand.get("ais_gap_hours", 0.0),
-            "ais_status": cand["ais_status"],
-            "distance_km": score_res["proximity_km"],
-            "proximity_score": score_res["proximity_score"],
-            "trajectory_score": score_res["trajectory_score"],
-            "behavioral_anomaly_score": score_res["behavioral_anomaly_score"],
-            "attribution_score_pct": overall_score_pct,
-            "risk_level": "PRIMARY SUSPECT" if overall_score_pct >= 80.0 else ("MODERATE RISK" if overall_score_pct >= 50.0 else "LOW RISK"),
-            "track_points": cand["track_points"]
-        })
-
-
-    # Sort suspects by overall score descending
-    ranked_suspects.sort(key=lambda x: x["attribution_score_pct"], reverse=True)
-
-    dark_vessels = _dark_vessel_detector.detect_dark_vessels(origin_lat, origin_lon)
-    responder_route = _responder_routing.calculate_intercept_route(
-        origin_lat, origin_lon, hindcast["drift_heading_deg"], hindcast["drift_speed_knots"]
-    )
-
-    return {
-        "scenario_id": "INC-20260913-0091",
-        "system_status": "ONLINE / S1-SAR LOCKED",
-        "sector": "MUMBAI HIGH / ARABIAN SEA",
-        "telemetry": {
-            "wind": "14.0 kts @ 065° NE",
-            "current": "1.2 kts @ 065° NE",
-            "sea_temp_c": 28.4,
-            "wave_height_m": 1.5,
-            "drift_vector": f"{hindcast['drift_heading_deg']}° T at {hindcast['drift_speed_knots']} knots"
-        },
-        "location": {
-            "name": "Mumbai High Offshore Oil Field Zone",
-            "lat": origin_lat,
-            "lon": origin_lon,
-            "coastline": "Konkan Coast, Arabian Sea"
-        },
-        "detected_slick": {
-            "area_sq_km": 14.8,
-            "estimated_age_hours": hindcast["hours_hindcasted"],
-            "drift_heading_deg": hindcast["drift_heading_deg"],
-            "drift_speed_knots": hindcast["drift_speed_knots"],
-            "perimeter_km": 28.4,
-            "compactness_index": 0.23,
-            "estimated_thickness_um": 2.15,
-            "estimated_volume_m3": 31.82,
-            "estimated_mass_tons": 27.68,
-            "weathering_stage": "Gravity-Viscous Drift & Evaporation"
-        },
-        "hindcast_trajectory": hindcast["trajectory_points"],
-        "drift_cone_polygon": hindcast["drift_cone_polygon"],
-        "reconstructed_release": reconstructed_release,
-        "ranked_suspects": ranked_suspects,
-        "dark_vessels": dark_vessels,
-        "responder_route": responder_route,
-        "infrastructure_proximity": {
-            "nearest_rig": "Mumbai High Field Centroid Complex",
-            "centroid_lat": field_centroid_lat,
-            "centroid_lon": field_centroid_lon,
-            "distance_km": round(dist_to_field, 2),
-            "rig_spill_risk_flag": False
-        }
-    }

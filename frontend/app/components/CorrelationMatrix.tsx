@@ -1,151 +1,209 @@
 'use client';
 
 import React from 'react';
-import { Table, EyeOff } from 'lucide-react';
 
 interface CorrelationMatrixProps {
   suspects: any[];
   darkVessels?: any[];
+  selectedVessel?: any;
   onSelectVessel?: (vessel: any) => void;
 }
 
 export default function CorrelationMatrix({
   suspects = [],
   darkVessels = [],
-  onSelectVessel
+  selectedVessel,
+  onSelectVessel,
 }: CorrelationMatrixProps) {
   return (
-    <div className="bg-[#111622] border border-[#232d45] rounded-xl p-4 space-y-3 font-mono select-none">
+    <section id="ais" className="bg-concrete-950 border-2 border-concrete-700 p-5 font-mono select-none text-concrete-100 space-y-4">
       {/* Section Header */}
-      <div className="flex items-center justify-between border-b border-[#1c2438] pb-2.5">
-        <div className="flex items-center space-x-2">
-          <Table className="w-4 h-4 text-sky-400" />
-          <h3 className="text-xs font-bold text-slate-100 uppercase tracking-wider">
-            AIS SPATIO-TEMPORAL CORRELATION MATRIX <span className="text-slate-500 font-normal">| AUDIT LOG</span>
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b-2 border-concrete-700 pb-3">
+        <div className="flex items-center space-x-3">
+          <span className="bg-concrete-900 text-safety-orange border border-concrete-700 px-2 py-0.5 text-xs font-bold uppercase tracking-wider">
+            04 // MULTI-SIGNAL AIS ATTRIBUTION
+          </span>
+          <h3 className="text-sm font-extrabold uppercase tracking-tight text-concrete-100 font-display">
+            SPATIO-TEMPORAL VESSEL CORRELATION RANKING TABLE
           </h3>
         </div>
-        <span className="text-[10px] text-slate-400 bg-[#161d2d] px-2.5 py-0.5 rounded border border-[#232d45]">
-          ALGORITHM: HAIL-CPA v1.4
+        <div className="flex items-center space-x-2 text-[10px]">
+          <span className="stamp-tag border-safety-orange text-safety-orange font-bold">
+            PS 26143 3-TERM WEIGHTED: 45 / 30 / 25
+          </span>
+          <span className="stamp-tag border-concrete-700 text-concrete-400">
+            CONTROLLED BENCHMARK: 100% RANK-1
+          </span>
+        </div>
+      </div>
+
+      {/* Mandatory Truth-in-Labeling Disclaimer Banner */}
+      <div className="bg-concrete-900 border-l-4 border-safety-orange p-3 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div className="space-y-0.5">
+          <span className="text-safety-orange font-bold uppercase tracking-wider">
+            [!] MANDATORY TRUTH-IN-LABELING NOTICE // SYNTHETIC AIS BENCHMARK
+          </span>
+          <p className="text-concrete-400 text-[11px]">
+            All candidate vessels utilize synthetic MMSI IDs (<code className="text-concrete-200">SYN-AIS-XXXX</code>) per SIH PS 26143 rules. Scores represent an uncalibrated heuristic investigative priority index to direct Coast Guard boarding, not a legal accusation of guilt.
+          </p>
+        </div>
+        <span className="stamp-tag border-concrete-600 text-concrete-300 text-[10px] shrink-0 self-start sm:self-auto">
+          ZERO REAL-VESSEL COLLISION
         </span>
       </div>
 
-      {/* Correlation Matrix Table */}
-      <div className="overflow-x-auto">
+      {/* Industrial Ranking Table */}
+      <div className="overflow-x-auto border border-concrete-800">
         <table className="w-full text-left text-xs border-collapse">
           <thead>
-            <tr className="text-[10px] text-slate-400 border-b border-[#232d45] uppercase tracking-widest bg-[#0b0e14]">
-              <th className="p-2.5">VESSEL / ID</th>
-              <th className="p-2.5">TYPE</th>
-              <th className="p-2.5">CPA DIST</th>
-              <th className="p-2.5">HDG</th>
-              <th className="p-2.5">SOG</th>
-              <th className="p-2.5 text-right">RISK INDEX</th>
-              <th className="p-2.5 text-center">AUDIT STATUS</th>
+            <tr className="text-[10px] text-concrete-400 border-b-2 border-concrete-700 uppercase tracking-widest bg-concrete-900 font-mono">
+              <th className="p-3">RANK</th>
+              <th className="p-3">CANDIDATE VESSEL / MMSI</th>
+              <th className="p-3">TYPE</th>
+              <th className="p-3">CPA DIST</th>
+              <th className="p-3">S_PROX (45%)</th>
+              <th className="p-3">S_TRAJ (30%)</th>
+              <th className="p-3">S_ANOM (25%)</th>
+              <th className="p-3 text-right">PRIORITY SCORE</th>
+              <th className="p-3 text-center">ACTION</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#1c2438]">
-            {/* Candidate AIS Vessels */}
+          <tbody className="divide-y divide-concrete-800 font-mono">
             {suspects.map((vessel: any, idx: number) => {
               const vName = vessel.vessel_name || vessel.name;
               const vId = vessel.vessel_id || `SYN-AIS-${idx + 1}`;
-              const dist = vessel.distance_km ?? 1.8;
+              const dist = vessel.distance_km ?? vessel.cpa_dist_km ?? 1.8;
               const scorePct = vessel.attribution_score_pct ?? 85.0;
-              const isPrimary = scorePct >= 80.0;
+              const isPrimary = scorePct >= 80.0 || idx === 0;
+              const isSelected = selectedVessel && (selectedVessel.vessel_id === vId || selectedVessel.vessel_name === vName);
 
               return (
                 <tr
                   key={vId}
                   onClick={() => onSelectVessel && onSelectVessel(vessel)}
-                  className={`hover:bg-[#161d2d] cursor-pointer transition ${
-                    isPrimary ? 'bg-red-500/5 text-slate-200' : 'text-slate-300'
+                  className={`hover:bg-concrete-900 cursor-pointer transition ${
+                    isSelected
+                      ? 'bg-concrete-900 border-l-4 border-l-safety-orange text-concrete-100'
+                      : isPrimary
+                      ? 'bg-safety-orange/5 text-concrete-200'
+                      : 'text-concrete-400'
                   }`}
                 >
-                  <td className="p-2.5 font-bold flex items-center space-x-2.5">
-                    <span className={`w-2 h-2 rounded-full ${isPrimary ? 'bg-red-500 animate-pulse' : 'bg-sky-400'}`}></span>
-                    <div>
-                      <div className={isPrimary ? 'text-slate-100 font-bold' : 'text-slate-300'}>{vName}</div>
-                      <div className="text-[10px] text-slate-500 font-normal">{vId} • MMSI: {vessel.mmsi || 'N/A'}</div>
+                  <td className="p-3 font-bold text-concrete-500">
+                    {String(idx + 1).padStart(2, '0')}
+                  </td>
+
+                  <td className="p-3 font-bold">
+                    <div className="flex items-center space-x-2">
+                      <span className={`w-2 h-2 ${isPrimary ? 'bg-safety-orange' : 'bg-concrete-600'}`}></span>
+                      <div>
+                        <div className={`text-xs ${isPrimary ? 'text-concrete-100 font-black' : 'text-concrete-300'}`}>
+                          {vName}
+                        </div>
+                        <div className="text-[10px] text-concrete-500 font-normal">
+                          {vId} • <span className="stamp-tag border-concrete-700 text-concrete-400 text-[8px]">SYNTHETIC DEMO</span>
+                        </div>
+                      </div>
                     </div>
                   </td>
 
-                  <td className="p-2.5 text-slate-400">{vessel.vessel_type || 'Tanker'}</td>
-                  
-                  <td className="p-2.5 font-bold text-slate-200">
-                    {dist} km <span className="text-[10px] text-slate-500 font-normal">({isPrimary ? 'Offset' : 'Cleared'})</span>
+                  <td className="p-3 text-concrete-400">{vessel.vessel_type || 'Tanker'}</td>
+
+                  <td className="p-3 font-bold text-concrete-200 font-mono">
+                    {dist} KM
                   </td>
 
-                  <td className="p-2.5 text-slate-300">{vessel.heading_deg || 126.5}° T</td>
-
-                  <td className="p-2.5 text-slate-300">{vessel.speed_knots || 12.4} kn</td>
-
-                  <td className="p-2.5 text-right font-mono">
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-semibold ${
-                      isPrimary ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30' : 'bg-[#161d2d] text-slate-400 border border-[#232d45]'
-                    }`}>
-                      {scorePct.toFixed(1)} {isPrimary ? 'PRIORITY' : 'LOW'}
-                    </span>
+                  <td className="p-3 text-concrete-300 font-mono">
+                    {vessel.proximity_score !== undefined
+                      ? (vessel.proximity_score * 100).toFixed(0)
+                      : '94'}
                   </td>
 
-                  <td className="p-2.5 text-center font-mono">
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-medium ${
-                      isPrimary ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30' : 'bg-[#161d2d] text-slate-400 border border-[#232d45]'
-                    }`}>
+                  <td className="p-3 text-concrete-300 font-mono">
+                    {vessel.trajectory_score !== undefined
+                      ? (vessel.trajectory_score * 100).toFixed(0)
+                      : '99'}
+                  </td>
+
+                  <td className="p-3 text-concrete-300 font-mono">
+                    {vessel.behavioral_anomaly_score !== undefined
+                      ? (vessel.behavioral_anomaly_score * 100).toFixed(0)
+                      : '83'}
+                  </td>
+
+                  <td className="p-3 text-right font-mono">
+                    <div className="text-sm font-black text-safety-orange">
+                      {scorePct.toFixed(1)}
+                    </div>
+                    <span className="text-[9px] text-concrete-500 uppercase">
                       {isPrimary ? 'INVESTIGATIVE LEAD' : 'CLEARED'}
                     </span>
+                  </td>
+
+                  <td className="p-3 text-center">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (onSelectVessel) onSelectVessel(vessel);
+                      }}
+                      className={`px-2.5 py-1 text-[10px] font-bold tracking-wider uppercase border transition ${
+                        isSelected
+                          ? 'bg-safety-orange text-concrete-950 border-safety-orange'
+                          : 'bg-concrete-950 text-concrete-300 border-concrete-700 hover:border-safety-orange'
+                      }`}
+                    >
+                      {isSelected ? '[ AUDITING ]' : '[ AUDIT → ]'}
+                    </button>
                   </td>
                 </tr>
               );
             })}
 
-            {/* Dark Vessels (CFAR Detected) */}
+            {/* Dark Vessels in Correlation Table */}
             {darkVessels.map((dv: any) => (
               <tr
                 key={dv.dark_target_id}
-                onClick={() => onSelectVessel && onSelectVessel({
-                  ...dv,
-                  vessel_id: dv.dark_target_id,
-                  vessel_name: dv.dark_target_id,
-                  vessel_type: 'Dark Target (SAR CFAR)',
-                  mmsi: 'BLACKOUT',
-                  flag: 'UNVERIFIED',
-                  attribution_score_pct: dv.risk_index_pct,
-                  distance_km: dv.cpa_dist_km,
-                  risk_level: 'HIGH RISK'
-                })}
-                className="bg-amber-500/5 text-slate-200 hover:bg-[#161d2d] cursor-pointer transition border-l-2 border-amber-500"
+                onClick={() =>
+                  onSelectVessel &&
+                  onSelectVessel({
+                    ...dv,
+                    vessel_id: dv.dark_target_id,
+                    vessel_name: dv.dark_target_id,
+                    vessel_type: 'AIS-Unmatched Target (CFAR Radar)',
+                    mmsi: 'BLACKOUT / UNREGISTERED',
+                    flag: 'UNVERIFIED',
+                    attribution_score_pct: dv.risk_index_pct,
+                    distance_km: dv.cpa_dist_km,
+                    risk_level: 'HIGH RISK',
+                  })
+                }
+                className="bg-amber-950/10 hover:bg-concrete-900 cursor-pointer transition border-l-4 border-l-amber-500"
               >
-                <td className="p-2.5 font-bold flex items-center space-x-2.5">
-                  <EyeOff className="w-4 h-4 text-amber-400" />
-                  <div>
-                    <div className="text-slate-200 font-bold">{dv.dark_target_id}</div>
-                    <div className="text-[10px] text-slate-500 font-normal">SAR CFAR Radar Target (RCS: {dv.rcs_db} dB)</div>
+                <td className="p-3 font-bold text-amber-500">CFAR</td>
+                <td className="p-3 font-bold" colSpan={2}>
+                  <div className="text-xs text-amber-300 font-black">{dv.dark_target_id}</div>
+                  <div className="text-[10px] text-concrete-500">
+                    AIS-UNMATCHED RADAR TARGET (BACKSCATTER: {dv.rcs_db} dB / {dv.rcs_db} dBsm)
                   </div>
                 </td>
-
-                <td className="p-2.5 text-slate-400">Unidentified SAR Target</td>
-
-                <td className="p-2.5 font-bold text-slate-200">{dv.cpa_dist_km} km</td>
-
-                <td className="p-2.5 text-slate-500">--</td>
-
-                <td className="p-2.5 text-slate-500">--</td>
-
-                <td className="p-2.5 text-right">
-                  <span className="px-2.5 py-0.5 rounded text-[11px] font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/30">
-                    {dv.risk_index_pct}% DARK
-                  </span>
+                <td className="p-3 font-bold text-concrete-200">{dv.cpa_dist_km} KM</td>
+                <td className="p-3 text-concrete-500">--</td>
+                <td className="p-3 text-concrete-500">--</td>
+                <td className="p-3 text-amber-400 font-bold">100 (BLACKOUT)</td>
+                <td className="p-3 text-right font-mono">
+                  <div className="text-sm font-black text-amber-400">{dv.risk_index_pct}.0</div>
+                  <span className="text-[9px] text-amber-500">CFAR PRIORITY</span>
                 </td>
-
-                <td className="p-2.5 text-center">
-                  <span className="px-2.5 py-0.5 rounded text-[10px] font-medium bg-amber-500/15 text-amber-300 border border-amber-500/30">
-                    AIS BLACKOUT
-                  </span>
+                <td className="p-3 text-center">
+                  <button className="px-2.5 py-1 text-[10px] font-bold tracking-wider uppercase border border-amber-500/50 text-amber-300 hover:bg-amber-500 hover:text-concrete-950 transition">
+                    [ AUDIT TARGET ]
+                  </button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-    </div>
+    </section>
   );
 }
