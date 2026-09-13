@@ -1,0 +1,141 @@
+{
+  "scenario_id": "INC-20260913-0091",
+  "system_status": "ONLINE / S1-SAR LOCKED",
+  "sector": "MUMBAI HIGH / ARABIAN SEA",
+  "telemetry": {
+    "wind": "14.0 kts @ 065° NE",
+    "current": "1.2 kts @ 065° NE",
+    "sea_temp_c": 28.4,
+    "wave_height_m": 1.5,
+    "drift_vector": "124.3° T at 1.0 knots"
+  },
+  "location": {
+    "name": "Mumbai High Offshore Oil Field Zone",
+    "lat": 19.412,
+    "lon": 71.325,
+    "coastline": "Konkan Coast, Arabian Sea"
+  },
+  "detected_slick": {
+    "area_sq_km": 14.8,
+    "estimated_age_hours": 6.5,
+    "drift_heading_deg": 124.3,
+    "drift_speed_knots": 1.0,
+    "perimeter_km": 28.4,
+    "compactness_index": 0.23,
+    "estimated_thickness_um": 2.15,
+    "estimated_volume_m3": 31.82,
+    "estimated_mass_tons": 27.68,
+    "weathering_stage": "Gravity-Viscous Drift & Evaporation"
+  },
+  "hindcast_trajectory": [
+    { "step": 0, "hours_ago": 0.0, "lat": 19.412, "lon": 71.325, "u_m_s": 0.425, "v_m_s": -0.19 },
+    { "step": 5, "hours_ago": 1.25, "lat": 19.424, "lon": 71.302, "u_m_s": 0.401, "v_m_s": -0.21 },
+    { "step": 10, "hours_ago": 2.5, "lat": 19.438, "lon": 71.278, "u_m_s": 0.385, "v_m_s": -0.23 },
+    { "step": 15, "hours_ago": 3.75, "lat": 19.451, "lon": 71.255, "u_m_s": 0.362, "v_m_s": -0.25 },
+    { "step": 20, "hours_ago": 5.0, "lat": 19.462, "lon": 71.231, "u_m_s": 0.345, "v_m_s": -0.27 },
+    { "step": 26, "hours_ago": 6.5, "lat": 19.47326, "lon": 71.20966, "u_m_s": 0.325, "v_m_s": -0.29 }
+  ],
+  "drift_cone_polygon": [
+    [19.47326, 71.20966],
+    [19.5162, 71.3051],
+    [19.412, 71.325],
+    [19.4981, 71.3214]
+  ],
+  "reconstructed_release": {
+    "step": 26,
+    "hours_ago": 6.5,
+    "lat": 19.47326,
+    "lon": 71.20966
+  },
+  "ranked_suspects": [
+    {
+      "vessel_id": "SYN-AIS-9482",
+      "vessel_name": "MT Ocean Pioneer",
+      "vessel_type": "Crude Oil Tanker",
+      "flag": "Panama",
+      "mmsi": "SYN-MMSI-41901",
+      "lat": 19.48526,
+      "lon": 71.19866,
+      "heading_deg": 126.5,
+      "speed_knots": 12.4,
+      "ais_status": "Active (Demonstration Track)",
+      "distance_km": 1.8,
+      "proximity_score": 0.937,
+      "trajectory_score": 0.999,
+      "attribution_score_pct": 96.4,
+      "risk_level": "PRIMARY SUSPECT",
+      "track_points": [
+        { "hours_ago": 6.0, "lat": 19.645, "lon": 71.021 },
+        { "hours_ago": 4.8, "lat": 19.613, "lon": 71.056 },
+        { "hours_ago": 3.6, "lat": 19.581, "lon": 71.092 },
+        { "hours_ago": 2.4, "lat": 19.549, "lon": 71.127 },
+        { "hours_ago": 1.2, "lat": 19.517, "lon": 71.163 },
+        { "hours_ago": 0.0, "lat": 19.485, "lon": 71.198 }
+      ]
+    },
+    {
+      "vessel_id": "SYN-AIS-7104",
+      "vessel_name": "MV Arabian Trader",
+      "vessel_type": "Container Ship",
+      "flag": "Liberia",
+      "mmsi": "SYN-MMSI-41902",
+      "lat": 19.42826,
+      "lon": 71.24766,
+      "heading_deg": 195.0,
+      "speed_knots": 15.1,
+      "ais_status": "Active (Demonstration Track)",
+      "distance_km": 6.4,
+      "proximity_score": 0.441,
+      "trajectory_score": 0.331,
+      "attribution_score_pct": 39.7,
+      "risk_level": "LOW RISK",
+      "track_points": [
+        { "hours_ago": 6.0, "lat": 19.702, "lon": 71.321 },
+        { "hours_ago": 4.8, "lat": 19.647, "lon": 71.306 },
+        { "hours_ago": 3.6, "lat": 19.592, "lon": 71.291 },
+        { "hours_ago": 2.4, "lat": 19.537, "lon": 71.276 },
+        { "hours_ago": 1.2, "lat": 19.482, "lon": 71.261 },
+        { "hours_ago": 0.0, "lat": 19.428, "lon": 71.247 }
+      ]
+    }
+  ],
+  "dark_vessels": [
+    {
+      "dark_target_id": "DARK-TARGET-04",
+      "sar_signature_type": "High RCS Metallic Hull (CFAR > 14.2 dB)",
+      "estimated_length_m": 240.0,
+      "lat": 19.433,
+      "lon": 71.307,
+      "rcs_db": 18.5,
+      "ais_matched": false,
+      "dark_vessel_flag": true,
+      "cpa_dist_km": 2.1,
+      "risk_index_pct": 88.2,
+      "audit_status": "AIS BLACKOUT / HIGH RISK"
+    }
+  ],
+  "responder_route": {
+    "responder_asset": "ICG Pollution Control Vessel (Demonstration Asset)",
+    "station_base": "Indian Coast Guard District HQ 2 (Mumbai Port Base)",
+    "transit_speed_knots": 22.0,
+    "distance_km": 164.2,
+    "distance_nm": 88.66,
+    "eta_hours": 4.03,
+    "eta_formatted": "T+4.0h (ETA ~242 mins)",
+    "intercept_point": { "lat": 19.418, "lon": 71.332 },
+    "boom_strategy": "2000m Heavy-Duty Offshore Skimming Boom Deployment",
+    "coastal_protection_target": "Konkan Mangrove Estuary & Raigad Marine Sanctuary",
+    "waypoints": [
+      { "name": "Mumbai Port Station Base", "lat": 18.9438, "lon": 72.8360 },
+      { "name": "Midway Vector", "lat": 19.178, "lon": 72.081 },
+      { "name": "Slick Intercept Zone", "lat": 19.418, "lon": 71.332 }
+    ]
+  },
+  "infrastructure_proximity": {
+    "nearest_rig": "Mumbai High Field Centroid Complex",
+    "centroid_lat": 19.417,
+    "centroid_lon": 71.333,
+    "distance_km": 1.03,
+    "rig_spill_risk_flag": false
+  }
+}
