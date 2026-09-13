@@ -1,0 +1,30 @@
+# Environment & Secrets
+.env
+.env.local
+*.env
+
+# Data & Models
+data/
+backend/app/models/weights/*.pth
+backend/app/models/weights/*.pt
+*.7z
+*.zip
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+build/
+dist/
+*.egg-info/
+
+# Next.js / Node
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/build/
+.DS_Store
+*.log
