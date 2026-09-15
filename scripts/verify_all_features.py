@@ -1,7 +1,12 @@
+import sys
+from pathlib import Path
 import time
 import torch
 import json
 import numpy as np
+
+ROOT_DIR = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT_DIR))
 
 print("======================================================================")
 print(" AegisSea — System-Wide Comprehensive Verification Test Suite")

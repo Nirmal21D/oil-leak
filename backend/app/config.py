@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     
     # Model Weights Path
     WEIGHTS_DIR: Path = BASE_DIR / "backend" / "app" / "models" / "weights"
-    DEFAULT_WEIGHTS_FILE: Path = WEIGHTS_DIR / "sos_unet_resnet34.pth"
+    DEFAULT_WEIGHTS_FILE: Path = WEIGHTS_DIR / "s1_unet_hardneg_best.pth"
 
     # Data Path
     DATA_DIR: Path = BASE_DIR / "data"

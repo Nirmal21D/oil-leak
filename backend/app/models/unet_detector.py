@@ -104,7 +104,8 @@ class TileSlidingInference:
         padded = np.pad(scene_rgb, ((0, pad_h), (0, pad_w), (0, 0)), mode="reflect")
         pH, pW, _ = padded.shape
         
-        probs_accum = np.zeros((3, pH, pW), dtype=np.float32)
+        num_classes = getattr(self.model, 'num_classes', 2)
+        probs_accum = np.zeros((num_classes, pH, pW), dtype=np.float32)
         count_accum = np.zeros((1, pH, pW), dtype=np.float32)
         
         for y in range(0, pH - self.tile_size + 1, self.stride):
@@ -128,12 +129,23 @@ class TileSlidingInference:
         return mask_pred
 
 def load_detector_model(weights_path: str = None, device: str = "cpu") -> OilSpillUNet:
-    model = OilSpillUNet(in_channels=3, num_classes=3)
+    num_classes = 2
+    state_dict = None
     if weights_path and Path(weights_path).exists():
         try:
             state_dict = torch.load(weights_path, map_location=device)
+            if "model.segmentation_head.0.weight" in state_dict:
+                num_classes = state_dict["model.segmentation_head.0.weight"].shape[0]
+            elif "segmentation_head.0.weight" in state_dict:
+                num_classes = state_dict["segmentation_head.0.weight"].shape[0]
+        except Exception as e:
+            print(f"[MODEL WARNING] Pre-inspection failed for {weights_path}: {e}")
+
+    model = OilSpillUNet(in_channels=3, num_classes=num_classes)
+    if state_dict is not None:
+        try:
             model.load_state_dict(state_dict)
-            print(f"[MODEL] Successfully loaded model weights from: {weights_path}")
+            print(f"[MODEL] Successfully loaded {num_classes}-class weights from: {weights_path}")
         except Exception as e:
             print(f"[MODEL WARNING] Failed to load weights from {weights_path}: {e}")
     else:

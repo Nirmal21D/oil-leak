@@ -213,7 +213,7 @@ export default function MapView({
         )}
 
         {/* Dynamic Oil Spill Polygon / Circle */}
-        {activeLayers?.slick_mask !== false && (
+        {activeLayers?.slick_mask !== false && (slickAreaKm2 ?? 0) > 0 && (
           <Circle
             center={[activeSlickLat, activeSlickLon]}
             radius={3500 + Math.abs(timelineHour) * 280}

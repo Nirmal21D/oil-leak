@@ -24,10 +24,10 @@ export default function Home() {
   const [selectedVessel, setSelectedVessel] = useState<any>(null);
   const [isDossierOpen, setIsDossierOpen] = useState<boolean>(false);
 
-  // Active Intelligence Workspace Module State (Default: attribution)
+  // Active Intelligence Workspace Module State (Default: sar so Ingest Hub is open on load)
   const [activeModule, setActiveModule] = useState<
     'attribution' | 'sar' | 'drift' | 'cfar' | 'responder'
-  >('attribution');
+  >('sar');
 
   // Tactical Layer Toggles State
   const [activeLayers, setActiveLayers] = useState<Record<string, boolean>>({
@@ -63,38 +63,12 @@ export default function Home() {
         setApiStatus(`ONLINE (${hData.device})`);
         setIsBackendConnected(true);
       } else {
-        setApiStatus('OFFLINE (FALLBACK)');
+        setApiStatus('OFFLINE');
         setIsBackendConnected(false);
       }
     } catch (e) {
-      setApiStatus('CACHED / FALLBACK MODE');
+      setApiStatus('OFFLINE');
       setIsBackendConnected(false);
-    }
-
-    try {
-      const resScenario = await fetch('http://localhost:8000/api/v1/attribution/demo-scenario');
-      if (resScenario.ok) {
-        const sData = await resScenario.json();
-        setScenarioData(sData);
-        if (sData?.ranked_suspects && sData.ranked_suspects.length > 0) {
-          setSelectedVessel(sData.ranked_suspects[0]);
-        }
-      } else {
-        throw new Error('API route unavailable');
-      }
-    } catch (e) {
-      try {
-        const resFallback = await fetch('/cached_demo_scenario.json');
-        if (resFallback.ok) {
-          const fData = await resFallback.json();
-          setScenarioData(fData);
-          if (fData?.ranked_suspects && fData.ranked_suspects.length > 0) {
-            setSelectedVessel(fData.ranked_suspects[0]);
-          }
-        }
-      } catch (err) {
-        console.error('Failed to load scenario data:', err);
-      }
     } finally {
       setLoading(false);
     }
@@ -122,6 +96,9 @@ export default function Home() {
       if (res.scenario_update.ranked_suspects && res.scenario_update.ranked_suspects.length > 0) {
         setSelectedVessel(res.scenario_update.ranked_suspects[0]);
       }
+    } else {
+      setScenarioData(null);
+      setSelectedVessel(null);
     }
   };
 
@@ -131,12 +108,12 @@ export default function Home() {
 
   const morphology = detectionResult?.morphology || scenarioData?.detected_slick;
 
-  const areaKm2 = morphology?.area_sq_km ?? 14.8;
-  const volumeM3 = morphology?.estimated_volume_m3 ?? 31.8;
-  const perimeterKm = morphology?.perimeter_km ?? 28.4;
-  const compactness = morphology?.compactness_index ?? 0.23;
-  const estimatedMassTons = morphology?.estimated_mass_tons ?? 27.7;
-  const thicknessUm = morphology?.estimated_thickness_um ?? 2.12;
+  const areaKm2 = morphology?.area_sq_km ?? 0.0;
+  const volumeM3 = morphology?.estimated_volume_m3 ?? 0.0;
+  const perimeterKm = morphology?.perimeter_km ?? 0.0;
+  const compactness = morphology?.compactness_index ?? 0.0;
+  const estimatedMassTons = morphology?.estimated_mass_tons ?? 0.0;
+  const thicknessUm = morphology?.estimated_thickness_um ?? 0.0;
 
   const observedCoordinates = scenarioData?.location
     ? { lat: scenarioData.location.lat, lon: scenarioData.location.lon }
@@ -145,7 +122,7 @@ export default function Home() {
     ? { lat: scenarioData.reconstructed_release.lat, lon: scenarioData.reconstructed_release.lon }
     : { lat: 19.4733, lon: 71.2097 };
 
-  const sourceLabel = detectionResult ? `LIVE: ${detectionResult.image_name}` : 'MODEL-DERIVED';
+  const sourceLabel = detectionResult ? `LIVE: ${detectionResult.image_name}` : (scenarioData ? 'MODEL-DERIVED' : 'STANDBY // AWAITING SENSOR INGEST');
 
   return (
     <div className="flex flex-col min-h-screen bg-concrete-950 text-concrete-100 font-sans selection:bg-safety-orange selection:text-concrete-950 bg-technical-grid">
@@ -162,9 +139,9 @@ export default function Home() {
       <IncidentHero
         areaKm2={areaKm2}
         volumeM3={volumeM3}
-        sensitivityKm={3.5}
-        priorityScore={activeSuspect?.attribution_score_pct || 93.1}
-        primarySuspectName={activeSuspect?.vessel_name || 'MT OCEAN PIONEER'}
+        sensitivityKm={scenarioData ? 3.5 : 0.0}
+        priorityScore={activeSuspect?.attribution_score_pct ?? 0.0}
+        primarySuspectName={activeSuspect?.vessel_name || 'STANDBY // AWAITING SENSOR INGEST'}
         perimeterKm={perimeterKm}
         compactness={compactness}
         estimatedMassTons={estimatedMassTons}
