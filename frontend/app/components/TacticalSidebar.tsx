@@ -26,7 +26,7 @@ export default function TacticalSidebar({
   const slickAreaKm2 = detectionResult?.morphology?.area_sq_km ?? scenarioData?.detected_slick?.area_sq_km;
   const uniqueVessels = scenarioData?.ais_provenance?.unique_vessels_tracked;
   const routing = scenarioData?.responder_route || scenarioData?.responder_routing || detectionResult?.responder_route || detectionResult?.responder_routing;
-  const wpiNum = routing?.selected_port?.wpi_number;
+  const wpiNum = routing?.selected_port?.wpi_number || routing?.wpi_number;
   const isAisReal = scenarioData?.is_historical_real ?? Boolean(scenarioData?.ais_provenance?.provider?.includes('NOAA'));
 
   const navItems = [

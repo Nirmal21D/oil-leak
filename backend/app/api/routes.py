@@ -45,6 +45,8 @@ from backend.app.services.ais_attribution_engine import AISAttributionEngine
 from backend.app.services.raster_validator import RasterValidator, RasterValidationError
 from backend.app.services.geospatial_service import GeospatialService
 from backend.app.services.metocean_provider import MetoceanProvider
+from backend.app.services.theater_service import TheaterService
+from backend.app.services.ai_briefing_service import AIBriefingService
 
 router = APIRouter(prefix="/api/v1", tags=["Detection & Attribution"])
 
@@ -966,4 +968,34 @@ def get_incident_detail(incident_id: str):
             _active_scenario = scenario
             return scenario
     raise HTTPException(status_code=404, detail=f"Incident '{incident_id}' not found in demo registry.")
+
+@router.get("/theater/scenes")
+def list_theater_scenes():
+    """
+    Returns the complete global catalog of verified Sentinel-1 SAR scenes
+    and regional demonstration fixtures for the Global Incident Theater.
+    Categories strictly adhere to:
+      - 'VERIFIED OIL SCENE'
+      - 'LOOKALIKE / NON-SPILL'
+      - 'UNREFERENCED SCENE'
+    """
+    return TheaterService.get_global_catalog()
+ 
+@router.post("/briefing/generate")
+def generate_incident_briefing_endpoint(payload: Optional[Dict[str, Any]] = None):
+    """
+    Generates a downstream forensic/investigative plain-English executive briefing.
+    Strictly Presentation Layer: uses structured deterministic evidence, never performs calculations.
+    Accepts generic evidence payload from any scene or pulls active scenario state.
+    """
+    evidence = payload
+    if not evidence:
+        if _active_scenario is not None:
+            evidence = dict(_active_scenario)
+            if _active_detection and "morphology" in _active_detection:
+                evidence["detected_slick"] = _active_detection["morphology"]
+        else:
+            raise HTTPException(status_code=400, detail="No active incident scenario or evidence payload provided.")
+    
+    return AIBriefingService.generate_incident_briefing(evidence_payload=evidence)
 

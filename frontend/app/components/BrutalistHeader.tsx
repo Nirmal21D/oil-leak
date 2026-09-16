@@ -11,8 +11,11 @@ interface BrutalistHeaderProps {
   sectorLabel?: string;
   incidentId?: string;
   onOpenDossier?: () => void;
+  onOpenAIBriefing?: () => void;
   onRunGolden?: () => void;
   isProcessing?: boolean;
+  currentView?: 'c2' | 'theater';
+  onSwitchView?: (view: 'c2' | 'theater') => void;
 }
 
 export default function BrutalistHeader({
@@ -23,8 +26,11 @@ export default function BrutalistHeader({
   sectorLabel,
   incidentId = 'STANDBY',
   onOpenDossier,
+  onOpenAIBriefing,
   onRunGolden,
   isProcessing = false,
+  currentView = 'c2',
+  onSwitchView,
 }: BrutalistHeaderProps) {
   const [timeUtc, setTimeUtc] = useState<string>('00:00:00 UTC');
 
@@ -85,6 +91,32 @@ export default function BrutalistHeader({
 
         {/* Right: Quick Action Triggers & System Clock */}
         <div className="flex items-center space-x-2">
+          {/* Workstation View Switcher */}
+          <div className="flex items-center space-x-1 border border-tactical-border p-0.5 bg-tactical-base mr-1">
+            <button
+              onClick={() => onSwitchView && onSwitchView('c2')}
+              className={`px-2 py-0.5 text-[10px] font-black uppercase transition cursor-pointer ${
+                currentView === 'c2'
+                  ? 'bg-tactical-amber text-tactical-base font-bold'
+                  : 'text-tactical-muted hover:text-tactical-text'
+              }`}
+              title="Tactical Incident C2 Workstation"
+            >
+              🎯 INCIDENT C2
+            </button>
+            <button
+              onClick={() => onSwitchView && onSwitchView('theater')}
+              className={`px-2 py-0.5 text-[10px] font-black uppercase transition cursor-pointer ${
+                currentView === 'theater'
+                  ? 'bg-tactical-cyan text-tactical-base font-bold'
+                  : 'text-tactical-muted hover:text-tactical-text'
+              }`}
+              title="Global Maritime Incident Theater"
+            >
+              🌐 GLOBAL THEATER
+            </button>
+          </div>
+
           {onRunGolden && (
             <button
               onClick={onRunGolden}
@@ -92,6 +124,15 @@ export default function BrutalistHeader({
               className="brutalist-btn-orange px-2.5 py-1 text-[11px] font-black uppercase tracking-wider flex items-center space-x-1 cursor-pointer disabled:opacity-50"
             >
               <span>{isProcessing ? '⚡ PROCESSING...' : '⚡ RUN GOLDEN: 00111 (NOAA AIS)'}</span>
+            </button>
+          )}
+
+          {onOpenAIBriefing && (
+            <button
+              onClick={onOpenAIBriefing}
+              className="brutalist-btn px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-tactical-cyan hover:bg-tactical-cyan hover:text-tactical-base cursor-pointer"
+            >
+              <span>[ 🤖 AI BRIEFING ]</span>
             </button>
           )}
 

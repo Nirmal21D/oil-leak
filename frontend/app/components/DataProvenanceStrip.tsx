@@ -64,7 +64,7 @@ export default function DataProvenanceStrip({
             <span className="text-concrete-500 font-semibold">PORTS:</span>
             <span className="text-concrete-200">NGA Pub 150 World Port Index</span>
             <span className="inline-flex items-center text-sky-400 text-[9px] font-bold">
-              ● {wpiSource.includes('LIVE') ? 'LIVE REST' : 'REGIONAL CACHE'}
+              ● {wpiSource.includes('LIVE') ? 'LIVE REST' : (wpiSource.includes('GLOBAL') ? 'PUB 150 GLOBAL' : 'REGIONAL CACHE')}
             </span>
           </div>
 

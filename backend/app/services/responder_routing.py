@@ -62,6 +62,7 @@ class CoastGuardResponderRouting:
                 "geodesic_distance_km": 0.0,
                 "navigable_distance_km": None,
                 "operational_eta_formatted": "NOT ESTABLISHED",
+                "selected_port": None,
                 "candidate_audit": {
                     "total_features_returned": raw_count,
                     "within_radius_count": 0,
@@ -136,8 +137,36 @@ class CoastGuardResponderRouting:
         for i, c in enumerate(candidates):
             c_copy = dict(c)
             c_copy["rank"] = i + 1
-            c_copy["is_selected"] = (c.get("wpi_number") == wpi_num and c.get("main_port_name") == selected_port.get("main_port_name"))
+            c_copy["is_selected"] = (
+                (c.get("wpi_number") and c.get("wpi_number") == wpi_num and c.get("main_port_name") == station_name)
+                or (c.get("main_port_name") == station_name and i == 0)
+                or (routing_status == "GEODESIC_FALLBACK" and i == 0)
+            )
             candidate_audit_list.append(c_copy)
+
+        # Build authoritative selected port identity object consumed by Tactical C2 UI
+        selected_port_obj = {
+            "port_name": station_name,
+            "main_port_name": station_name,
+            "wpi_number": wpi_num,
+            "un_locode": un_locode,
+            "unlocode": un_locode,
+            "country": country,
+            "lat": station_lat,
+            "lon": station_lon,
+            "geodesic_distance_km": geodesic_km,
+            "geodesic_distance_nm": geodesic_nm,
+            "distance_km": geodesic_km,
+            "distance_nm": geodesic_nm,
+            "bearing_deg": bearing,
+            "channel_depth_m": selected_port.get("channel_depth_m"),
+            "anchorage_depth_m": selected_port.get("anchorage_depth_m"),
+            "cargo_pier_depth_m": selected_port.get("cargo_pier_depth_m"),
+            "harbor_size": selected_port.get("harbor_size", "Unreported"),
+            "harbor_type": selected_port.get("harbor_type", "Unreported"),
+            "shelter_afforded": selected_port.get("shelter_afforded", "Unreported"),
+            "source": source_tag
+        }
 
         # Project drift intercept zone locus
         rad = math.radians(drift_heading_deg)
@@ -161,6 +190,7 @@ class CoastGuardResponderRouting:
             "routing_reason": provider_reason,
             "selection_basis": selection_basis,
             "maritime_access": maritime_access,
+            "selected_port": selected_port_obj,
             "response_hub": station_name,
             "station_base": station_name,
             "station_country": country,

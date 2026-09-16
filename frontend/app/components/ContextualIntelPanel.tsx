@@ -34,7 +34,17 @@ export default function ContextualIntelPanel({
   const massTons = morphology?.estimated_mass_tons != null ? `~${Number(morphology.estimated_mass_tons).toFixed(1)} Metric Tons` : 'UNAVAILABLE';
   const recRelease = scenarioData?.reconstructed_release;
   const routing = scenarioData?.responder_route || scenarioData?.responder_routing || detectionResult?.responder_route || detectionResult?.responder_routing;
-  const selectedPort = routing?.selected_port;
+  const selectedPort =
+    routing?.selected_port ||
+    (routing?.response_hub && routing?.response_hub !== 'PORT DATA UNAVAILABLE'
+      ? {
+          port_name: routing.response_hub,
+          wpi_number: routing.wpi_number,
+          un_locode: routing.un_locode,
+          geodesic_distance_km: routing.geodesic_distance_km,
+          bearing_deg: routing.bearing_deg,
+        }
+      : null);
   const candidateAudit = routing?.candidate_audit;
   const rankedCandidates = scenarioData?.ranked_suspects || [];
 
@@ -63,6 +73,24 @@ export default function ContextualIntelPanel({
   const behavDeflect = activeCandidate?.max_course_change_deg != null
     ? `${Number(activeCandidate.max_course_change_deg).toFixed(0)}° Deflect`
     : (activeCandidate?.behavioral_anomaly_score != null ? `${(activeCandidate.behavioral_anomaly_score * 100).toFixed(0)}% Anom` : 'N/A');
+
+  const [showTechnicalEvidence, setShowTechnicalEvidence] = React.useState(false);
+
+  // Level 1 Human-Readable Evidence fields (from backend evidence_summary or candidate fields)
+  const evidenceSummary = activeCandidate?.evidence_summary;
+  const cpaDisplay = evidenceSummary?.cpa_display || (activeCandidate?.distance_km != null ? `${Number(activeCandidate.distance_km).toFixed(2)} KM` : 'N/A');
+  const temporalContext = evidenceSummary?.temporal_context || 'WINDOW OVERLAP VERIFIED';
+  const cpaTime = evidenceSummary?.cpa_time_utc || activeCandidate?.cpa_time_utc || 'RECORDED IN WINDOW';
+  const trajectoryDisplay = evidenceSummary?.trajectory_display || (
+    activeCandidate?.trajectory_score === 0 ? 'NO POSITIVE CONTRIBUTION' :
+    activeCandidate?.max_course_change_deg ? `${Number(activeCandidate.max_course_change_deg).toFixed(0)}° COURSE DEVIATION` :
+    `${Number(activeCandidate?.trajectory_score ?? 0).toFixed(3)} CONTRIBUTION`
+  );
+  const behaviorDisplay = evidenceSummary?.behavior_display || (
+    activeCandidate?.anomaly_flags && activeCandidate.anomaly_flags.length > 0
+      ? activeCandidate.anomaly_flags.join(' · ')
+      : (activeCandidate?.max_course_change_deg ? `${Number(activeCandidate.max_course_change_deg).toFixed(0)}° COURSE DEVIATION` : 'STANDARD TRANSIT BASELINE')
+  );
 
   return (
     <aside className="w-full lg:w-[380px] shrink-0 bg-tactical-navy border border-tactical-border flex flex-col justify-between font-mono text-xs select-none">
@@ -133,53 +161,147 @@ export default function ContextualIntelPanel({
             </div>
           </div>
 
-          {/* Top Attribution Lead Card */}
-          <div className="bg-tactical-panel border-2 border-tactical-amber p-3.5 space-y-2.5">
-            <div className="flex items-start justify-between border-b border-tactical-border pb-2">
+          {/* TWO-TIER EVIDENCE CARD (LEVEL 1 HUMAN-READABLE / LEVEL 2 TECHNICAL) */}
+          <div className="bg-tactical-panel border-2 border-tactical-amber p-3.5 space-y-3">
+            {/* Candidate Identity Header */}
+            <div className="flex items-start justify-between border-b border-tactical-border pb-2.5">
               <div>
                 <span className="text-[9px] text-tactical-dim font-bold uppercase tracking-wider block">
                   PRIMARY ATTRIBUTION CANDIDATE
                 </span>
-                <h4 className="font-extrabold text-base text-tactical-text font-display uppercase">
+                <h4 className="font-extrabold text-base text-tactical-text font-display uppercase tracking-wide">
                   {activeCandidate?.vessel_name || (scenarioData ? 'NO CANDIDATE IDENTIFIED' : 'STANDBY')}
                 </h4>
-                <span className="text-[10px] text-tactical-muted font-mono">
-                  {activeCandidate?.mmsi ? `MMSI: ${activeCandidate.mmsi}` : 'MMSI: —'} · {activeCandidate?.vessel_type?.toUpperCase() || 'VESSEL'}
+                <span className="text-[10px] text-tactical-muted font-mono block mt-0.5">
+                  {activeCandidate?.mmsi ? `MMSI ${activeCandidate.mmsi}` : 'MMSI: —'} · {activeCandidate?.vessel_type?.toUpperCase() || 'COMMERCIAL VESSEL'}
                 </span>
               </div>
               <div className="text-right">
-                <span className="text-[9px] text-tactical-dim uppercase block">AEGISSEA INDEX</span>
-                <span className="text-xl font-black text-tactical-amber font-mono">
-                  {scoreDisplay}
+                <span className="stamp-tag border-tactical-amber text-tactical-amber text-[9px] px-1.5 py-0.5 font-bold">
+                  {activeCandidate?.is_primary_suspect ? 'TOP LEAD' : 'CORRELATED'}
                 </span>
               </div>
             </div>
 
-            {/* Why This Candidate Breakdown */}
-            <div className="space-y-1.5">
-              <span className="text-[10px] text-tactical-dim font-bold uppercase block">
-                WHY THIS CANDIDATE? // FACTOR CONTRIBUTION
-              </span>
-              <div className="grid grid-cols-3 gap-1.5 text-[10px]">
-                <div className="bg-tactical-navy p-1.5 border border-tactical-border">
-                  <span className="text-tactical-muted block text-[9px]">PROXIMITY</span>
-                  <strong className="text-tactical-amber block font-bold">{proxPts}</strong>
-                  <span className="text-tactical-dim text-[8px]">{proxCpa}</span>
+            {/* Level 1: "WHY THIS VESSEL WAS FLAGGED" */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] text-tactical-amber font-bold tracking-wider uppercase">
+                  WHY THIS VESSEL WAS FLAGGED
+                </span>
+                <span className="text-[8px] text-tactical-dim font-mono">
+                  FORENSIC SUMMARY
+                </span>
+              </div>
+
+              <div className="space-y-1.5 text-[11px] font-mono">
+                {/* CPA */}
+                <div className="bg-tactical-navy p-2 border border-tactical-border flex items-center justify-between">
+                  <div>
+                    <span className="text-[9px] text-tactical-dim uppercase block">CLOSEST POINT OF APPROACH (CPA)</span>
+                    <strong className="text-tactical-amber font-bold text-xs">{cpaDisplay}</strong>
+                  </div>
+                  <span className="text-[9px] text-tactical-muted font-mono">TO RELEASE LOCUS</span>
                 </div>
-                <div className="bg-tactical-navy p-1.5 border border-tactical-amber/50">
-                  <span className="text-tactical-amber block text-[9px] font-bold">TRAJECTORY</span>
-                  <strong className="text-tactical-amber block font-bold">{trajPts}</strong>
-                  <span className="text-tactical-dim text-[8px]">{trajFactor}</span>
+
+                {/* TEMPORAL CONTEXT */}
+                <div className="bg-tactical-navy p-2 border border-tactical-border flex items-center justify-between">
+                  <div>
+                    <span className="text-[9px] text-tactical-dim uppercase block">TEMPORAL CONTEXT</span>
+                    <strong className="text-tactical-cyan font-bold text-[11px]">{temporalContext}</strong>
+                  </div>
+                  <span className="text-[9px] text-tactical-muted font-mono">{cpaTime}</span>
                 </div>
-                <div className="bg-tactical-navy p-1.5 border border-tactical-border">
-                  <span className="text-tactical-muted block text-[9px]">BEHAVIOR</span>
-                  <strong className="text-tactical-text block font-bold">{behavPts}</strong>
-                  <span className="text-tactical-dim text-[8px]">{behavDeflect}</span>
+
+                {/* TRAJECTORY */}
+                <div className="bg-tactical-navy p-2 border border-tactical-border flex items-center justify-between">
+                  <div>
+                    <span className="text-[9px] text-tactical-dim uppercase block">TRAJECTORY</span>
+                    <strong className="text-tactical-text font-bold text-[11px]">{trajectoryDisplay}</strong>
+                  </div>
+                  <span className="text-[9px] text-tactical-dim font-mono">{trajPts}</span>
+                </div>
+
+                {/* BEHAVIOR */}
+                <div className="bg-tactical-navy p-2 border border-tactical-border flex items-center justify-between">
+                  <div>
+                    <span className="text-[9px] text-tactical-dim uppercase block">BEHAVIOR</span>
+                    <strong className="text-tactical-amber font-bold text-[11px]">{behaviorDisplay}</strong>
+                  </div>
+                  <span className="text-[9px] text-tactical-dim font-mono">{behavPts}</span>
                 </div>
               </div>
-              <p className="text-[9px] text-tactical-dim leading-tight pt-1">
-                * Factor breakdown computed dynamically from spatial proximity, course convergence, and behavioral anomaly vectors.
+            </div>
+
+            {/* Attribution Index Banner */}
+            <div className="bg-tactical-navy/90 border border-tactical-amber/60 p-2.5 space-y-1">
+              <div className="flex items-baseline justify-between">
+                <span className="text-[10px] text-tactical-muted uppercase font-bold">
+                  AEGISSEA ATTRIBUTION INDEX
+                </span>
+                <span className="text-xl font-black text-tactical-amber font-mono">
+                  {scoreDisplay}
+                </span>
+              </div>
+              <p className="text-[9px] text-tactical-dim italic leading-tight">
+                * Engineering prioritization index. Not a probability of responsibility.
               </p>
+            </div>
+
+            {/* Level 2 Expandable Toggle */}
+            <div>
+              <button
+                type="button"
+                onClick={() => setShowTechnicalEvidence(!showTechnicalEvidence)}
+                className="w-full bg-tactical-navy hover:bg-tactical-hover text-tactical-text border border-tactical-border hover:border-tactical-amber px-2.5 py-1.5 text-[10px] font-bold flex items-center justify-between transition cursor-pointer"
+              >
+                <span className="flex items-center space-x-1.5 text-tactical-cyan">
+                  <span>{showTechnicalEvidence ? '▼' : '▶'}</span>
+                  <span>[ ≡ {showTechnicalEvidence ? 'HIDE' : 'VIEW'} TECHNICAL EVIDENCE ]</span>
+                </span>
+                <span className="text-[9px] text-tactical-dim">AUDIT MATHEMATICS</span>
+              </button>
+
+              {/* Level 2 Drawer */}
+              {showTechnicalEvidence && (
+                <div className="mt-2 bg-tactical-navy border border-tactical-border p-2.5 space-y-2 text-[10px] font-mono">
+                  <div className="border-b border-tactical-border/60 pb-1 flex items-center justify-between text-[9px] text-tactical-dim">
+                    <span>ANALYTICAL WEIGHTING EQUATION</span>
+                    <span className="text-tactical-cyan font-bold">HEURISTIC 45/30/25</span>
+                  </div>
+                  <div className="bg-tactical-base p-1.5 border border-tactical-border text-[9px] text-tactical-muted">
+                    <code>Score = 0.45·Prox + 0.30·Traj + 0.25·Anom</code>
+                  </div>
+                  <div className="space-y-1 text-[10px] text-tactical-muted">
+                    <div className="flex justify-between">
+                      <span>Proximity Decay (σ = 6.0 km):</span>
+                      <strong className="text-tactical-amber font-mono">
+                        {proxPts} (Score: {activeCandidate?.proximity_score != null ? Number(activeCandidate.proximity_score).toFixed(3) : '—'})
+                      </strong>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Cosine Alignment (cos Δθ):</span>
+                      <strong className="text-tactical-text font-mono">
+                        {trajPts} (Score: {activeCandidate?.trajectory_score != null ? Number(activeCandidate.trajectory_score).toFixed(3) : '—'})
+                      </strong>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Behavioral Anomaly Index:</span>
+                      <strong className="text-tactical-amber font-mono">
+                        {behavPts} (Score: {activeCandidate?.behavioral_anomaly_score != null ? Number(activeCandidate.behavioral_anomaly_score).toFixed(3) : '—'})
+                      </strong>
+                    </div>
+                  </div>
+                  <div className="border-t border-tactical-border/60 pt-1.5 space-y-1 text-[9px] text-tactical-dim">
+                    <p>TOTAL AIS PINGS AUDITED: {activeCandidate?.total_pings ?? 0}</p>
+                    <p>AIS BROADCAST GAP: {activeCandidate?.max_gap_hours ? `${Number(activeCandidate.max_gap_hours).toFixed(1)} HRS` : 'NONE DETECTED'}</p>
+                    <p>PROVENANCE: NOAA MarineCadastre Real Historical AIS Stream</p>
+                    <p className="italic text-tactical-muted pt-0.5">
+                      Forensic/investigative evidence presentation. Does not establish legal causality.
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -121,6 +121,36 @@ class AISAttributionEngine:
                 priority_tier = "LOW CORRELATION CANDIDATE"
                 is_top_candidate = False
 
+            # Plain-English forensic evidence presentation summary
+            cpa_display = f"{min_dist_km:.2f} KM"
+            temporal_overlap = "WINDOW OVERLAP VERIFIED" if cpa_time else "ESTIMATED OVERLAP"
+            
+            if traj_score < 0.05:
+                trajectory_display = "NO POSITIVE CONTRIBUTION"
+            elif traj.get("max_course_change_deg", 0.0) > 40.0:
+                trajectory_display = f"{traj.get('max_course_change_deg', 0.0):.0f}° COURSE DEVIATION"
+            else:
+                trajectory_display = f"{cpa_cog:.0f}° HEADING ({traj_score:.2f} COSINE FACTOR)"
+
+            if anomaly_flags:
+                behavior_display = " · ".join(anomaly_flags)
+            else:
+                behavior_display = "STANDARD COMMERCIAL TRANSIT BASELINE"
+
+            evidence_summary = {
+                "cpa_km": round(min_dist_km, 2),
+                "cpa_display": cpa_display,
+                "temporal_context": temporal_overlap,
+                "cpa_time_utc": cpa_time,
+                "trajectory_display": trajectory_display,
+                "trajectory_score": round(traj_score, 3),
+                "behavior_display": behavior_display,
+                "behavior_score": round(anomaly_score, 3),
+                "attribution_index": overall_score_pct,
+                "attribution_index_display": f"{overall_score_pct} / 100",
+                "disclaimer": "Engineering prioritization index. Not a probability of responsibility."
+            }
+
             candidates.append({
                 "vessel_id": f"MMSI-{mmsi}",
                 "vessel_name": name,
@@ -155,6 +185,7 @@ class AISAttributionEngine:
                 "has_ais_gap": traj.get("has_ais_gap", False),
                 "anomaly_flags": anomaly_flags,
                 "anomaly_reasons": ", ".join(anomaly_flags) if anomaly_flags else "Standard Transit Baseline",
+                "evidence_summary": evidence_summary,
                 "attribution_breakdown": {
                     "proximity_score": round(prox_score, 3),
                     "trajectory_score": round(traj_score, 3),

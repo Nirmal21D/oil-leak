@@ -8,6 +8,8 @@ interface EvidenceChainBannerProps {
   detectionResult?: any;
   activePhase?: 'overview' | 'sar' | 'drift' | 'ais' | 'responder';
   onSelectPhase?: (phase: 'overview' | 'sar' | 'drift' | 'ais' | 'responder') => void;
+  onStartReplay?: () => void;
+  isReplayOpen?: boolean;
 }
 
 export default function EvidenceChainBanner({
@@ -15,12 +17,24 @@ export default function EvidenceChainBanner({
   detectionResult,
   activePhase,
   onSelectPhase,
+  onStartReplay,
+  isReplayOpen,
 }: EvidenceChainBannerProps) {
   const isReal = scenarioData?.is_historical_real ?? true;
   const areaVal = detectionResult?.morphology?.area_sq_km ?? scenarioData?.detected_slick?.area_sq_km;
   const topCandidate = scenarioData?.ranked_suspects?.[0];
   const routing = scenarioData?.responder_route || scenarioData?.responder_routing || detectionResult?.responder_route || detectionResult?.responder_routing;
-  const selectedPort = routing?.selected_port;
+  const selectedPort =
+    routing?.selected_port ||
+    (routing?.response_hub && routing?.response_hub !== 'PORT DATA UNAVAILABLE'
+      ? {
+          port_name: routing.response_hub,
+          wpi_number: routing.wpi_number,
+          un_locode: routing.un_locode,
+          geodesic_distance_km: routing.geodesic_distance_km,
+          bearing_deg: routing.bearing_deg,
+        }
+      : null);
 
   const steps = [
     {
@@ -102,7 +116,20 @@ export default function EvidenceChainBanner({
           </div>
 
           <div className="flex items-center space-x-2">
-            <span className="text-tactical-dim text-[9px] hidden md:inline">CLICK PHASE TO NAVIGATE WORKSPACE:</span>
+            {onStartReplay && (
+              <button
+                onClick={onStartReplay}
+                className={`px-2.5 py-1 text-[10px] font-black uppercase tracking-wider transition shadow-sm flex items-center space-x-1.5 cursor-pointer border ${
+                  isReplayOpen
+                    ? 'bg-tactical-amber text-tactical-base border-tactical-amber'
+                    : 'bg-tactical-panel hover:bg-tactical-hover text-tactical-amber border-tactical-amber'
+                }`}
+              >
+                <span>{isReplayOpen ? '⏸' : '▶'}</span>
+                <span>{isReplayOpen ? 'REPLAY ACTIVE' : 'RECONSTRUCTION REPLAY'}</span>
+              </button>
+            )}
+            <span className="text-tactical-dim text-[9px] hidden md:inline">CLICK PHASE TO NAVIGATE:</span>
             <span className={`stamp-tag ${scenarioData ? 'border-tactical-green text-tactical-green' : 'border-tactical-dim text-tactical-dim'} text-[9px] px-1.5 py-0.2`}>
               {scenarioData ? '● CHAIN ACTIVE' : '○ STANDBY'}
             </span>

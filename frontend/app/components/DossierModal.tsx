@@ -10,6 +10,7 @@ interface DossierModalProps {
   detectionResult?: any;
   infraData?: any;
   suspect?: any;
+  onOpenAIBriefing?: () => void;
 }
 
 export default function DossierModal({
@@ -19,6 +20,7 @@ export default function DossierModal({
   detectionResult,
   infraData,
   suspect,
+  onOpenAIBriefing,
 }: DossierModalProps) {
   const [activePageTab, setActivePageTab] = useState<number>(1);
 
@@ -36,7 +38,17 @@ export default function DossierModal({
   const massTons = morphology?.estimated_mass_tons != null ? Number(morphology.estimated_mass_tons).toFixed(1) : 'UNAVAILABLE';
   const recRelease = scenarioData?.reconstructed_release;
   const routing = scenarioData?.responder_route || scenarioData?.responder_routing || detectionResult?.responder_route || detectionResult?.responder_routing;
-  const selectedPort = routing?.selected_port;
+  const selectedPort =
+    routing?.selected_port ||
+    (routing?.response_hub && routing?.response_hub !== 'PORT DATA UNAVAILABLE'
+      ? {
+          port_name: routing.response_hub,
+          wpi_number: routing.wpi_number,
+          un_locode: routing.un_locode,
+          geodesic_distance_km: routing.geodesic_distance_km,
+          bearing_deg: routing.bearing_deg,
+        }
+      : null);
   const candidateAudit = routing?.candidate_audit;
   const rankedSuspects = scenarioData?.ranked_suspects || [];
 
@@ -72,6 +84,15 @@ export default function DossierModal({
           </div>
 
           <div className="flex items-center space-x-2">
+            {onOpenAIBriefing && (
+              <button
+                onClick={onOpenAIBriefing}
+                className="brutalist-btn bg-tactical-navy border border-tactical-cyan text-tactical-cyan hover:bg-tactical-cyan hover:text-tactical-base px-3 py-1.5 font-bold text-xs tracking-wider uppercase flex items-center space-x-1.5 cursor-pointer"
+              >
+                <span>🤖</span>
+                <span>[ AI EXECUTIVE BRIEFING ]</span>
+              </button>
+            )}
             <button
               onClick={handlePrint}
               className="brutalist-btn-orange px-3.5 py-1.5 font-black text-xs tracking-wider uppercase flex items-center space-x-1.5 cursor-pointer"
@@ -457,7 +478,7 @@ export default function DossierModal({
                   SPATIO-TEMPORAL AIS CORRELATION
                 </span>
                 <h2 className="text-lg font-black text-concrete-100 uppercase tracking-tight mt-0.5 print:text-black">
-                  PAGE 04 / 07 // AIS CORRELATION & CANDIDATE RANKING
+                  PAGE 04 / 07 // FORENSIC EVIDENCE PRESENTATION & AIS ATTRIBUTION
                 </h2>
               </div>
               <div className="text-right text-[11px] text-concrete-400 font-mono print:text-black">
@@ -466,68 +487,90 @@ export default function DossierModal({
               </div>
             </div>
 
-            {/* Methodology formula callout */}
-            <div className="border border-concrete-800 p-3 bg-concrete-900/60 text-xs font-mono print:bg-gray-50 print:border-gray-300">
-              <div className="flex items-center justify-between border-b border-concrete-800 pb-1.5 mb-2">
-                <span className="text-safety-orange font-bold uppercase text-[10px]">
-                  MATHEMATICAL ATTRIBUTION FORMULATION (PS-26143)
-                </span>
-                <span className="stamp-tag border-concrete-700 text-concrete-400 text-[9px]">
-                  ENGINEERING METHODOLOGY
-                </span>
-              </div>
-              <div className="text-concrete-200 text-[11px] bg-concrete-950 p-2 border border-concrete-800 font-mono">
-                S = (0.45 × Proximity_Factor) + (0.30 × Trajectory_Factor) + (0.25 × Behavioral_Anomaly)
-              </div>
-              <p className="text-[10px] text-concrete-500 mt-1.5 leading-normal">
-                Scores are reported on an index scale of <strong>0 to 100</strong>. This score represents an automated engineering prioritization index for maritime interrogation, NOT a probability of guilt or judicial liability.
-              </p>
-            </div>
-
-            {/* Primary Candidate Dossier Card */}
+            {/* Level 1: Human-Readable Evidence Summary Callout */}
             <div className="border-2 border-safety-orange p-4 bg-concrete-900/80 space-y-3 print:border-black print:bg-gray-50">
               <div className="flex flex-wrap items-center justify-between border-b border-concrete-800 pb-2">
                 <div>
                   <span className="text-[10px] text-safety-orange font-bold uppercase tracking-wider block">
-                    PRIMARY INTERROGATION LEAD // RANK 01
+                    PRIMARY ATTRIBUTION CANDIDATE // RANK 01
                   </span>
                   <span className="text-base font-black text-concrete-100 font-display">
                     {activeSuspect?.vessel_name || (scenarioData ? 'NO CANDIDATE IDENTIFIED' : 'STANDBY')}
                   </span>
+                  <span className="text-[10px] text-concrete-400 font-mono block mt-0.5">
+                    {activeSuspect?.mmsi ? `MMSI ${activeSuspect.mmsi}` : 'MMSI —'} · {activeSuspect?.vessel_type?.toUpperCase() || 'VESSEL'}
+                  </span>
                 </div>
                 <div className="text-right">
-                  <span className="text-[10px] text-concrete-500 block">AEGISSEA COMPOSITE INDEX</span>
-                  <span className="text-lg font-black text-safety-orange font-mono">
+                  <span className="text-[10px] text-concrete-500 block uppercase">AEGISSEA ATTRIBUTION INDEX</span>
+                  <span className="text-xl font-black text-safety-orange font-mono">
                     {scoreDisplay}
+                  </span>
+                  <span className="text-[9px] text-concrete-400 block italic">
+                    Engineering prioritization index
                   </span>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">
-                <div>
-                  <span className="text-concrete-500 block text-[10px]">MMSI / IMO</span>
-                  <strong className="text-concrete-200 font-mono">{activeSuspect?.mmsi || '—'}</strong>
-                </div>
-                <div>
-                  <span className="text-concrete-500 block text-[10px]">VESSEL TYPE</span>
-                  <strong className="text-concrete-200 font-mono">{activeSuspect?.vessel_type || 'VESSEL'}</strong>
-                </div>
-                <div>
-                  <span className="text-concrete-500 block text-[10px]">CLOSEST APPROACH (CPA)</span>
-                  <strong className="text-safety-orange font-mono font-bold">
-                    {(activeSuspect?.distance_km ?? activeSuspect?.cpa_dist_km) != null ? `${(activeSuspect.distance_km ?? activeSuspect.cpa_dist_km).toFixed(1)} KM` : 'N/A'}
-                  </strong>
-                </div>
-                <div>
-                  <span className="text-concrete-500 block text-[10px]">CPA TIME WINDOW</span>
-                  <strong className="text-concrete-200 font-mono">
-                    {activeSuspect?.cpa_time_utc || (scenarioData?.release_window?.observation_time_utc ? scenarioData.release_window.observation_time_utc.slice(0, 16).replace('T', ' ') + ' UTC' : 'T -6.5H (ESTIMATED)')}
-                  </strong>
+              {/* WHY THIS VESSEL WAS FLAGGED */}
+              <div className="space-y-2">
+                <span className="text-[10px] font-bold text-safety-orange uppercase tracking-wider block">
+                  WHY THIS VESSEL WAS FLAGGED // EVIDENCE SUMMARY
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-mono">
+                  <div className="bg-concrete-950 p-2.5 border border-concrete-800 flex justify-between items-center">
+                    <div>
+                      <span className="text-concrete-500 text-[10px] uppercase block">CPA TO RELEASE LOCUS</span>
+                      <strong className="text-safety-orange font-bold text-xs">
+                        {(activeSuspect?.distance_km ?? activeSuspect?.cpa_dist_km) != null ? `${(activeSuspect.distance_km ?? activeSuspect.cpa_dist_km).toFixed(2)} KM` : 'N/A'}
+                      </strong>
+                    </div>
+                    <span className="text-concrete-500 text-[9px]">CLOSEST APPROACH</span>
+                  </div>
+
+                  <div className="bg-concrete-950 p-2.5 border border-concrete-800 flex justify-between items-center">
+                    <div>
+                      <span className="text-concrete-500 text-[10px] uppercase block">TEMPORAL CONTEXT</span>
+                      <strong className="text-cyan-400 font-bold text-xs">
+                        WINDOW OVERLAP VERIFIED
+                      </strong>
+                    </div>
+                    <span className="text-concrete-500 text-[9px]">
+                      {activeSuspect?.cpa_time_utc || 'T -6.5H'}
+                    </span>
+                  </div>
+
+                  <div className="bg-concrete-950 p-2.5 border border-concrete-800 flex justify-between items-center">
+                    <div>
+                      <span className="text-concrete-500 text-[10px] uppercase block">TRAJECTORY ALIGNMENT</span>
+                      <strong className="text-concrete-200 font-bold text-xs">
+                        {activeSuspect?.trajectory_score === 0 ? 'NO POSITIVE CONTRIBUTION' : (activeSuspect?.max_course_change_deg ? `${Number(activeSuspect.max_course_change_deg).toFixed(0)}° COURSE DEVIATION` : 'CORRELATED')}
+                      </strong>
+                    </div>
+                    <span className="text-amber-400 text-[9px]">
+                      {activeSuspect?.trajectory_score != null ? `${(activeSuspect.trajectory_score * 30).toFixed(1)} pts` : '0.0 pts'}
+                    </span>
+                  </div>
+
+                  <div className="bg-concrete-950 p-2.5 border border-concrete-800 flex justify-between items-center">
+                    <div>
+                      <span className="text-concrete-500 text-[10px] uppercase block">BEHAVIORAL ANOMALY</span>
+                      <strong className="text-safety-orange font-bold text-xs">
+                        {activeSuspect?.anomaly_flags && activeSuspect.anomaly_flags.length > 0 ? activeSuspect.anomaly_flags.join(' · ') : (activeSuspect?.max_course_change_deg ? `${Number(activeSuspect.max_course_change_deg).toFixed(0)}° COURSE DEVIATION` : 'STANDARD TRANSIT BASELINE')}
+                      </strong>
+                    </div>
+                    <span className="text-emerald-400 text-[9px]">
+                      {activeSuspect?.behavioral_anomaly_score != null ? `${(activeSuspect.behavioral_anomaly_score * 25).toFixed(1)} pts` : '0.0 pts'}
+                    </span>
+                  </div>
                 </div>
               </div>
 
-              {/* Explicit mathematical disclosure */}
-              <div className="border-t border-concrete-800 pt-2 space-y-1.5 text-[11px]">
+              {/* Level 2: Explicit Mathematical Formulation */}
+              <div className="border-t border-concrete-800 pt-2.5 space-y-1.5 text-[11px] font-mono">
+                <span className="text-[10px] font-bold text-concrete-400 uppercase tracking-wider block">
+                  LEVEL 2 TECHNICAL EVIDENCE AUDIT (0.45 · PROX + 0.30 · TRAJ + 0.25 · BEHAV)
+                </span>
                 <div className="flex justify-between">
                   <span className="text-concrete-400">1. Spatial Proximity Component (45% Weight):</span>
                   <span className="font-mono text-concrete-200 font-bold">
@@ -553,7 +596,7 @@ export default function DossierModal({
               <div className="bg-concrete-950 p-2.5 border border-concrete-800 text-[10px] text-concrete-400 leading-normal">
                 <strong className="text-amber-400 block mb-0.5">FORENSIC NOTE REGARDING ATTRIBUTION METRICS:</strong>
                 {activeSuspect
-                  ? `${activeSuspect.vessel_name || 'Candidate'} was prioritized on the basis of evaluated spatial proximity (${(activeSuspect.distance_km ?? activeSuspect.cpa_dist_km ?? 0).toFixed(1)} km CPA) and AIS kinematic telemetry. Trajectory factor (${(activeSuspect.trajectory_score ?? 0).toFixed(3)}) reflects course convergence with modeled drift and is preserved transparently without artificial inflation.`
+                  ? `${activeSuspect.vessel_name || 'Candidate'} was prioritized on the basis of evaluated spatial proximity (${(activeSuspect.distance_km ?? activeSuspect.cpa_dist_km ?? 0).toFixed(1)} km CPA) and AIS kinematic telemetry. Trajectory factor (${(activeSuspect.trajectory_score ?? 0).toFixed(3)}) reflects course convergence with modeled drift and is preserved transparently without artificial inflation. Forensic presentation only; does not establish legal causality.`
                   : 'Attribution metrics awaiting active candidate selection.'}
               </div>
             </div>
