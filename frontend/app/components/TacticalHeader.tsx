@@ -36,7 +36,7 @@ export default function TacticalHeader({
             <span className="text-slate-700">•</span>
             <span className="text-slate-400">INCIDENT: <strong className="text-slate-200">INC-20260913-0091</strong></span>
             <span className="text-slate-700">•</span>
-            <span className="text-slate-400">SECTOR: <strong className="text-slate-200">MUMBAI HIGH / ARABIAN SEA</strong></span>
+            <span className="text-slate-400">SECTOR: <strong className="text-slate-200">DYNAMIC OFFSHORE SECTOR</strong></span>
           </div>
         </div>
 

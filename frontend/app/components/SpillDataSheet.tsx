@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { formatCoordinate } from '../utils/geo';
 
 interface SpillDataSheetProps {
   scenarioData?: any;
@@ -12,18 +13,23 @@ export default function SpillDataSheet({
   detectionResult,
 }: SpillDataSheetProps) {
   const morphology = detectionResult?.morphology || scenarioData?.detected_slick;
-  const slickArea = morphology?.area_sq_km !== undefined ? morphology.area_sq_km : 14.8;
-  const volumeM3 = morphology?.estimated_volume_m3 !== undefined ? morphology.estimated_volume_m3 : 31.8;
-  const perimeterKm = morphology?.perimeter_km !== undefined ? morphology.perimeter_km : 28.4;
-  const compactness = morphology?.compactness_index !== undefined ? morphology.compactness_index : 0.23;
-  const thickness = morphology?.estimated_thickness_um !== undefined ? morphology.estimated_thickness_um : 2.12;
-  const massTons = morphology?.estimated_mass_tons !== undefined ? morphology.estimated_mass_tons : 27.68;
-  const weatheringStage = morphology?.weathering_stage || "Gravity-Viscous Drift & Evaporation";
-  const sourceName = detectionResult?.image_name || "MUMBAI HIGH REFERENCE SCENE";
-  const obsLat = scenarioData?.location?.lat ?? 19.4120;
-  const obsLon = scenarioData?.location?.lon ?? 71.3250;
-  const relLat = scenarioData?.reconstructed_release?.lat ?? 19.4733;
-  const relLon = scenarioData?.reconstructed_release?.lon ?? 71.2097;
+  const isComputed = morphology?.is_computed_morphology !== false && morphology?.area_sq_km != null;
+
+  const slickArea = isComputed ? morphology.area_sq_km : null;
+  const volumeM3 = isComputed ? morphology.estimated_volume_m3 : null;
+  const perimeterKm = isComputed ? morphology.perimeter_km : null;
+  const compactness = isComputed ? morphology.compactness_index : null;
+  const thickness = isComputed ? morphology.estimated_thickness_um : null;
+  const massTons = isComputed ? morphology.estimated_mass_tons : null;
+  const weatheringStage = isComputed
+    ? (morphology?.weathering_stage || "Gravity-Viscous Drift & Evaporation")
+    : "AWAITING SENSOR INGEST";
+
+  const sourceName = detectionResult?.image_name || (scenarioData ? "PROCESSED SCENE" : "STANDBY // NO SCENE");
+  const obsLat = scenarioData?.location?.lat;
+  const obsLon = scenarioData?.location?.lon;
+  const relLat = scenarioData?.reconstructed_release?.lat;
+  const relLon = scenarioData?.reconstructed_release?.lon;
 
   return (
     <section id="drift" className="bg-concrete-950 border-2 border-concrete-700 p-5 font-mono select-none text-concrete-100 space-y-4">
@@ -41,8 +47,8 @@ export default function SpillDataSheet({
           <span className="stamp-tag border-concrete-700 text-concrete-300">
             SOURCE: {sourceName}
           </span>
-          <span className="stamp-tag border-safety-orange text-safety-orange">
-            STATUS: MODEL-DERIVED
+          <span className={`stamp-tag ${isComputed ? 'border-safety-orange text-safety-orange' : 'border-concrete-700 text-concrete-400'}`}>
+            STATUS: {isComputed ? 'MODEL-DERIVED' : 'STANDBY'}
           </span>
         </div>
       </div>
@@ -55,34 +61,46 @@ export default function SpillDataSheet({
               SPILL PHYSICAL DATA SHEET // SPECIFICATION
             </span>
             <span className="text-[10px] text-concrete-500 font-mono">
-              COMPUTED FROM INPUT CONTOURS
+              {isComputed ? 'COMPUTED FROM INPUT CONTOURS' : 'AWAITING SENSOR INGEST'}
             </span>
           </div>
 
           <div className="divide-y divide-concrete-800 text-xs">
             <div className="py-2 flex items-center justify-between">
               <span className="text-concrete-400 font-bold">SURFACE AREA:</span>
-              <strong className="text-concrete-100 font-mono text-sm">{slickArea} KM²</strong>
+              <strong className="text-concrete-100 font-mono text-sm">
+                {slickArea != null ? `${Number(slickArea).toFixed(2)} KM²` : 'NOT AVAILABLE'}
+              </strong>
             </div>
             <div className="py-2 flex items-center justify-between">
               <span className="text-concrete-400 font-bold">ESTIMATED PERIMETER:</span>
-              <strong className="text-concrete-200 font-mono">{perimeterKm} KM</strong>
+              <strong className="text-concrete-200 font-mono">
+                {perimeterKm != null ? `${Number(perimeterKm).toFixed(2)} KM` : 'NOT AVAILABLE'}
+              </strong>
             </div>
             <div className="py-2 flex items-center justify-between">
               <span className="text-concrete-400 font-bold">ESTIMATED VOLUME (FAY):</span>
-              <strong className="text-safety-orange font-mono text-sm">{volumeM3} M³ (~{massTons} METRIC TONS)</strong>
+              <strong className="text-safety-orange font-mono text-sm">
+                {volumeM3 != null ? `${Number(volumeM3).toFixed(2)} M³ (~${massTons != null ? Number(massTons).toFixed(2) : '—'} METRIC TONS)` : 'NOT AVAILABLE'}
+              </strong>
             </div>
             <div className="py-2 flex items-center justify-between">
               <span className="text-concrete-400 font-bold">ESTIMATED AVERAGE THICKNESS:</span>
-              <strong className="text-concrete-200 font-mono">{thickness} μM (IRIDESCENT SHEEN)</strong>
+              <strong className="text-concrete-200 font-mono">
+                {thickness != null ? `${Number(thickness).toFixed(2)} μM (IRIDESCENT SHEEN)` : 'NOT AVAILABLE'}
+              </strong>
             </div>
             <div className="py-2 flex items-center justify-between">
               <span className="text-concrete-400 font-bold">ISOPERIMETRIC COMPACTNESS:</span>
-              <strong className="text-concrete-200 font-mono">{compactness} {compactness < 0.3 ? '(WIND-ELONGATED)' : '(COHESIVE SLICK)'}</strong>
+              <strong className="text-concrete-200 font-mono">
+                {compactness != null ? `${Number(compactness).toFixed(2)} ${compactness < 0.3 ? '(WIND-ELONGATED)' : '(COHESIVE SLICK)'}` : 'NOT AVAILABLE'}
+              </strong>
             </div>
             <div className="py-2 flex items-center justify-between">
               <span className="text-concrete-400 font-bold">SEGMENTATION UNCERTAINTY:</span>
-              <strong className="text-concrete-300 font-mono">±15% ({(slickArea * 0.85).toFixed(1)} – {(slickArea * 1.15).toFixed(1)} KM²)</strong>
+              <strong className="text-concrete-300 font-mono">
+                {slickArea != null ? `±15% (${(slickArea * 0.85).toFixed(1)} – ${(slickArea * 1.15).toFixed(1)} KM²)` : 'NOT APPLICABLE'}
+              </strong>
             </div>
             <div className="py-2 flex items-center justify-between">
               <span className="text-concrete-400 font-bold">WEATHERING STAGE:</span>
@@ -106,14 +124,22 @@ export default function SpillDataSheet({
           <div className="bg-concrete-950 border border-concrete-800 p-3 space-y-2 text-center text-xs">
             <div className="flex items-center justify-between border-b border-concrete-800 pb-1 text-[10px] text-concrete-400">
               <span>SAR OBSERVATION (T0)</span>
-              <span>{obsLat.toFixed(4)}° N, {obsLon.toFixed(4)}° E</span>
+              <span>
+                {obsLat != null && obsLon != null
+                  ? formatCoordinate(obsLat, obsLon)
+                  : 'AWAITING SCENE'}
+              </span>
             </div>
             <div className="py-1 text-concrete-500 font-bold text-xs">
               ↓ BACKWARD 2D LAGRANGIAN ADVECTION (M2 SEMI-DIURNAL TIDE + 3.5% WINDAGE) ↓
             </div>
             <div className="bg-concrete-900 border border-safety-orange p-2 text-safety-orange font-bold text-xs flex items-center justify-between">
               <span>PROBABLE RELEASE LOCUS (T -6.5H):</span>
-              <span className="font-mono text-sm">{relLat.toFixed(4)}° N, {relLon.toFixed(4)}° E</span>
+              <span className="font-mono text-sm">
+                {relLat != null && relLon != null
+                  ? formatCoordinate(relLat, relLon)
+                  : 'AWAITING HINDCAST'}
+              </span>
             </div>
           </div>
 
@@ -132,8 +158,24 @@ export default function SpillDataSheet({
               <span className="text-concrete-100 font-mono font-bold">3.18 KM (BOUNDED)</span>
             </div>
             <div className="flex items-center justify-between text-concrete-400">
+              <span>METOCEAN FORCING:</span>
+              <span className={`font-mono font-bold ${
+                scenarioData?.telemetry?.metocean_source?.startsWith('CMEMS')
+                  ? 'text-emerald-400'
+                  : 'text-yellow-400'
+              }`}>
+                {scenarioData?.telemetry?.metocean_source_label || (
+                  scenarioData?.telemetry?.metocean_source === 'CMEMS_LIVE' || scenarioData?.telemetry?.metocean_source === 'CMEMS_CACHED'
+                    ? 'CMEMS LOCATION-MATCHED'
+                    : (scenarioData?.telemetry?.metocean_source ? 'FALLBACK MODEL DEFAULTS' : 'AWAITING INGEST')
+                )}
+              </span>
+            </div>
+            <div className="flex items-center justify-between text-concrete-400">
               <span>FORWARD FORECAST HORIZON:</span>
-              <span className="text-sky-400 font-mono">T+0H → T+12H (49 WAYPOINTS)</span>
+              <span className="text-sky-400 font-mono">
+                {scenarioData?.hindcast_trajectory ? `T+0H → T+12H (${scenarioData.hindcast_trajectory.length} WAYPOINTS)` : 'STANDBY'}
+              </span>
             </div>
           </div>
 

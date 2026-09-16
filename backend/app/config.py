@@ -18,6 +18,10 @@ class Settings(BaseSettings):
     # Data Path
     DATA_DIR: Path = BASE_DIR / "data"
 
+    # Copernicus Marine Service (CMEMS) credentials
+    COPERNICUSMARINE_SERVICE_USERNAME: str = ""
+    COPERNICUSMARINE_SERVICE_PASSWORD: str = ""
+
     model_config = SettingsConfigDict(
         env_file=str(BASE_DIR / ".env"),
         env_file_encoding="utf-8",

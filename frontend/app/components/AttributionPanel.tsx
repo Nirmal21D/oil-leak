@@ -57,7 +57,7 @@ export default function AttributionPanel({ suspects, infraData, detectionResult 
             <div>
               <h3 className="font-bold text-sm text-slate-200">No Candidate AIS Tracks Available</h3>
               <p className="text-xs text-slate-400 mt-1 max-w-xs leading-relaxed">
-                Connect backend AIS stream to screen candidate vessels along Mumbai High shipping lanes.
+                Connect backend AIS stream to screen candidate vessels along regional maritime shipping lanes.
               </p>
             </div>
           </div>

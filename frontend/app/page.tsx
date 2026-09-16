@@ -2,17 +2,19 @@
 
 import React, { useEffect, useState } from 'react';
 import BrutalistHeader from './components/BrutalistHeader';
-import IncidentHero from './components/IncidentHero';
-import BrutalistLayers from './components/BrutalistLayers';
+import TacticalSidebar from './components/TacticalSidebar';
+import ContextualIntelPanel from './components/ContextualIntelPanel';
 import MapView from './components/MapView';
 import IncidentTimeline from './components/IncidentTimeline';
-import CorrelationMatrix from './components/CorrelationMatrix';
-import ForensicAttributionPanel from './components/ForensicAttributionPanel';
 import SARWorkspace from './components/SARWorkspace';
-import SpillDataSheet from './components/SpillDataSheet';
-import CFARRadarPanel from './components/CFARRadarPanel';
+import CorrelationMatrix from './components/CorrelationMatrix';
 import ResponderVectorPanel from './components/ResponderVectorPanel';
+import EvidenceChainBanner from './components/EvidenceChainBanner';
+import DataProvenanceStrip from './components/DataProvenanceStrip';
 import DossierModal from './components/DossierModal';
+import { formatCoordinate } from './utils/geo';
+
+type ModuleType = 'overview' | 'sar' | 'drift' | 'ais' | 'responder';
 
 export default function Home() {
   const [apiStatus, setApiStatus] = useState<string>('CONNECTING');
@@ -20,14 +22,13 @@ export default function Home() {
   const [scenarioData, setScenarioData] = useState<any>(null);
   const [detectionResult, setDetectionResult] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [timelineHour, setTimelineHour] = useState<number>(0);
   const [selectedVessel, setSelectedVessel] = useState<any>(null);
   const [isDossierOpen, setIsDossierOpen] = useState<boolean>(false);
 
-  // Active Intelligence Workspace Module State (Default: sar so Ingest Hub is open on load)
-  const [activeModule, setActiveModule] = useState<
-    'attribution' | 'sar' | 'drift' | 'cfar' | 'responder'
-  >('sar');
+  // Active Tactical Investigation Phase
+  const [activeModule, setActiveModule] = useState<ModuleType>('overview');
 
   // Tactical Layer Toggles State
   const [activeLayers, setActiveLayers] = useState<Record<string, boolean>>({
@@ -55,19 +56,24 @@ export default function Home() {
   };
 
   const fetchScenarioData = async () => {
-    setLoading(true);
     try {
-      const resHealth = await fetch('http://localhost:8000/api/v1/health');
-      if (resHealth.ok) {
-        const hData = await resHealth.json();
-        setApiStatus(`ONLINE (${hData.device})`);
+      setLoading(true);
+      const res = await fetch('http://127.0.0.1:8000/api/v1/scenario/current');
+      if (res.ok) {
+        const data = await res.json();
+        setScenarioData(data);
         setIsBackendConnected(true);
+        setApiStatus('ONLINE');
+        if (data.ranked_suspects && data.ranked_suspects.length > 0) {
+          setSelectedVessel(data.ranked_suspects[0]);
+        }
       } else {
         setApiStatus('OFFLINE');
         setIsBackendConnected(false);
       }
-    } catch (e) {
-      setApiStatus('OFFLINE');
+    } catch (err) {
+      console.warn('Backend connection failed:', err);
+      setApiStatus('DISCONNECTED');
       setIsBackendConnected(false);
     } finally {
       setLoading(false);
@@ -78,15 +84,32 @@ export default function Home() {
     fetchScenarioData();
   }, []);
 
-
+  // Golden Scenario Quick-Trigger
+  const handleRunGoldenPreset = async () => {
+    try {
+      setIsProcessing(true);
+      const res = await fetch('http://127.0.0.1:8000/api/v1/detect/preset/00111', {
+        method: 'POST',
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setDetectionResult(data);
+        if (data.scenario_update) {
+          setScenarioData(data.scenario_update);
+          if (data.scenario_update.ranked_suspects?.length > 0) {
+            setSelectedVessel(data.scenario_update.ranked_suspects[0]);
+          }
+        }
+      }
+    } catch (e) {
+      console.error('Failed to run golden preset:', e);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   const handleSelectVessel = (vessel: any) => {
     setSelectedVessel(vessel);
-    if (vessel.vessel_type?.includes('CFAR') || vessel.dark_target_id) {
-      setActiveModule('cfar');
-    } else {
-      setActiveModule('attribution');
-    }
   };
 
   const handleDetectionComplete = (res: any) => {
@@ -96,236 +119,205 @@ export default function Home() {
       if (res.scenario_update.ranked_suspects && res.scenario_update.ranked_suspects.length > 0) {
         setSelectedVessel(res.scenario_update.ranked_suspects[0]);
       }
-    } else {
-      setScenarioData(null);
-      setSelectedVessel(null);
     }
   };
 
-  const activeSuspect =
+  const activeCandidate =
     selectedVessel ||
     (scenarioData?.ranked_suspects ? scenarioData.ranked_suspects[0] : null);
 
   const morphology = detectionResult?.morphology || scenarioData?.detected_slick;
+  const areaKm2 = morphology?.area_sq_km != null ? morphology.area_sq_km : undefined;
+  const volumeM3 = morphology?.estimated_volume_m3 != null ? morphology.estimated_volume_m3 : undefined;
 
-  const areaKm2 = morphology?.area_sq_km ?? 0.0;
-  const volumeM3 = morphology?.estimated_volume_m3 ?? 0.0;
-  const perimeterKm = morphology?.perimeter_km ?? 0.0;
-  const compactness = morphology?.compactness_index ?? 0.0;
-  const estimatedMassTons = morphology?.estimated_mass_tons ?? 0.0;
-  const thicknessUm = morphology?.estimated_thickness_um ?? 0.0;
+  const sceneBounds = scenarioData?.scene_bounds || detectionResult?.leaflet_bounds;
+  const detectedPolygons = detectionResult?.leaflet_polygons || scenarioData?.detected_polygons || [];
+  const isGeoreferenced = detectionResult ? detectionResult.scene_georeferenced : (scenarioData?.scene_georeferenced ?? true);
+  const georeferenceStatus = detectionResult?.georeference_status || scenarioData?.georeference_status;
+
+  const parseCoords = (c: any) => {
+    if (!c) return null;
+    const lat = typeof c.lat === 'number' ? c.lat : (Array.isArray(c) ? c[0] : null);
+    const lon = typeof c.lon === 'number' ? c.lon : (Array.isArray(c) ? c[1] : null);
+    if (lat != null && lon != null) return { lat, lon };
+    return null;
+  };
 
   const observedCoordinates = scenarioData?.location
     ? { lat: scenarioData.location.lat, lon: scenarioData.location.lon }
-    : { lat: 19.4120, lon: 71.3250 };
-  const releaseCoordinates = scenarioData?.reconstructed_release
-    ? { lat: scenarioData.reconstructed_release.lat, lon: scenarioData.reconstructed_release.lon }
-    : { lat: 19.4733, lon: 71.2097 };
-
-  const sourceLabel = detectionResult ? `LIVE: ${detectionResult.image_name}` : (scenarioData ? 'MODEL-DERIVED' : 'STANDBY // AWAITING SENSOR INGEST');
+    : (parseCoords(detectionResult?.slick_centroid)
+        || parseCoords(detectionResult?.scene_center)
+        || null);
 
   return (
-    <div className="flex flex-col min-h-screen bg-concrete-950 text-concrete-100 font-sans selection:bg-safety-orange selection:text-concrete-950 bg-technical-grid">
-      {/* 01 Architectural Header */}
+    <div className="flex flex-col min-h-screen bg-tactical-base text-tactical-text font-sans selection:bg-tactical-amber selection:text-tactical-base bg-technical-grid">
+      
+      {/* 01 Tactical C2 Header */}
       <BrutalistHeader
         apiStatus={apiStatus}
         isBackendConnected={isBackendConnected}
         telemetry={scenarioData?.telemetry}
-        incidentCoordinates={releaseCoordinates}
+        incidentCoordinates={observedCoordinates}
+        incidentId={scenarioData?.scenario_id || (isBackendConnected ? 'STANDBY' : 'OFFLINE')}
         onOpenDossier={() => setIsDossierOpen(true)}
+        onRunGolden={handleRunGoldenPreset}
+        isProcessing={isProcessing}
       />
 
-      {/* 02 Streamlined Incident Hero Strip (Compact single row) */}
-      <IncidentHero
-        areaKm2={areaKm2}
-        volumeM3={volumeM3}
-        sensitivityKm={scenarioData ? 3.5 : 0.0}
-        priorityScore={activeSuspect?.attribution_score_pct ?? 0.0}
-        primarySuspectName={activeSuspect?.vessel_name || 'STANDBY // AWAITING SENSOR INGEST'}
-        perimeterKm={perimeterKm}
-        compactness={compactness}
-        estimatedMassTons={estimatedMassTons}
-        thicknessUm={thicknessUm}
-        observedCoordinates={observedCoordinates}
-        releaseCoordinates={releaseCoordinates}
-        sourceLabel={sourceLabel}
-        onOpenDossier={() => setIsDossierOpen(true)}
-        onSelectModule={(mod: any) => setActiveModule(mod)}
+      {/* 02 Persistent Data Feeds Telemetry Strip */}
+      <DataProvenanceStrip
+        scenarioData={scenarioData}
+        detectionResult={detectionResult}
       />
 
-      {/* 03 11-Layer Evidence Switchboard */}
-      <BrutalistLayers activeLayers={activeLayers} toggleLayer={toggleLayer} />
+      {/* 03 Global Evidence Chain Workflow Banner */}
+      <EvidenceChainBanner
+        scenarioData={scenarioData}
+        detectionResult={detectionResult}
+        activePhase={activeModule}
+        onSelectPhase={(phase) => setActiveModule(phase)}
+      />
 
-      {/* 04 Main Tactical Command Center Grid (Side-by-Side Unified Workspace) */}
-      <main className="flex-1 p-3 lg:p-4 grid grid-cols-1 lg:grid-cols-12 gap-4 max-w-[1920px] w-full mx-auto">
-        {/* Left 7 Columns: Tactical Map, Compact Timeline Scrubber & Correlation Table */}
-        <div className="lg:col-span-7 flex flex-col space-y-3">
-          {/* Tactical Map Container */}
-          <div className="h-[460px] shadow-[4px_4px_0px_#141820]">
+      {/* 04 Main Tactical Tri-Pane Workspace */}
+      <main className="flex-1 flex flex-col lg:flex-row p-2 lg:p-3 gap-2 min-h-0">
+        
+        {/* Left Column: Fixed Navigation & Layer Matrix (260px) */}
+        <TacticalSidebar
+          activeModule={activeModule}
+          onSelectModule={(mod) => setActiveModule(mod)}
+          activeLayers={activeLayers}
+          onToggleLayer={toggleLayer}
+          onOpenDossier={() => setIsDossierOpen(true)}
+          scenarioData={scenarioData}
+          detectionResult={detectionResult}
+        />
+
+        {/* Center Column: Dominant Tactical Map (~65-70% visual hero) */}
+        <div className="flex-1 flex flex-col space-y-2 min-w-0">
+          
+          {/* Tactical Map Viewport Instrument */}
+          <div className="h-[520px] lg:h-[580px] w-full border border-tactical-border relative bg-tactical-base shadow-[2px_2px_0px_#070B0F]">
+            
+            {/* Map Instrument Top Frame Status */}
+            <div className="absolute top-2 left-2 z-[400] bg-tactical-navy/90 border border-tactical-border px-2.5 py-1 text-[10px] font-mono text-tactical-text flex items-center space-x-3 pointer-events-none">
+              <div>
+                <span className="text-tactical-dim">SCENE: </span>
+                <strong className="text-tactical-amber font-bold">
+                  {detectionResult?.image_name || scenarioData?.scenario_id || '—'}
+                </strong>
+              </div>
+              <span className="text-tactical-border">•</span>
+              <div>
+                <span className="text-tactical-dim">SECTOR: </span>
+                <strong className="text-tactical-text">
+                  {scenarioData?.sector || (scenarioData ? 'ACTIVE MARITIME SECTOR' : '—')}
+                </strong>
+              </div>
+              <span className="text-tactical-border hidden sm:inline">•</span>
+              <div className="hidden sm:block">
+                <span className="text-tactical-dim">COORDINATES: </span>
+                <span className="text-tactical-muted">
+                  {observedCoordinates ? formatCoordinate(observedCoordinates.lat, observedCoordinates.lon) : '—'}
+                </span>
+              </div>
+            </div>
+
+            {/* Tactical Leaflet Map */}
             <MapView
-              centerLat={scenarioData?.location?.lat || 19.412}
-              centerLon={scenarioData?.location?.lon || 71.325}
+              centerLat={observedCoordinates?.lat}
+              centerLon={observedCoordinates?.lon}
+              sceneBounds={sceneBounds}
+              detectedPolygons={detectedPolygons}
+              isGeoreferenced={isGeoreferenced}
+              georeferenceStatus={georeferenceStatus}
               suspects={scenarioData?.ranked_suspects || []}
               darkVessels={scenarioData?.dark_vessels || []}
               hindcastTrajectory={scenarioData?.hindcast_trajectory || []}
               driftConePolygon={scenarioData?.drift_cone_polygon || []}
-              responderRoute={scenarioData?.responder_route}
+              responderRoute={scenarioData?.responder_route || scenarioData?.responder_routing || detectionResult?.responder_route || detectionResult?.responder_routing}
               reconstructedRelease={scenarioData?.reconstructed_release}
               infraData={scenarioData?.infrastructure_proximity}
               activeLayers={activeLayers}
               timelineHour={timelineHour}
-              selectedVessel={activeSuspect}
+              selectedVessel={activeCandidate}
               onSelectVessel={handleSelectVessel}
               slickAreaKm2={areaKm2}
               slickVolumeM3={volumeM3}
+              telemetry={scenarioData?.telemetry}
             />
           </div>
 
-          {/* Compact Horizontal Engineering Timeline Scrubber */}
+          {/* Compact Chrono Timeline Scrubber */}
           <IncidentTimeline
             timelineHour={timelineHour}
             onTimelineChange={(h) => setTimelineHour(h)}
           />
 
-          {/* AIS Spatio-Temporal Correlation Matrix Table */}
-          <CorrelationMatrix
-            suspects={scenarioData?.ranked_suspects || []}
-            darkVessels={scenarioData?.dark_vessels || []}
-            selectedVessel={activeSuspect}
-            onSelectVessel={handleSelectVessel}
-          />
-        </div>
-
-        {/* Right 5 Columns: Dedicated Workspace with Architectural Module Switcher */}
-        <div className="lg:col-span-5 flex flex-col space-y-3">
-          {/* Architectural Module Switcher Tabs Bar */}
-          <div className="bg-concrete-900 border-2 border-concrete-700 p-1 font-mono flex items-center overflow-x-auto gap-1 text-xs select-none">
-            <button
-              onClick={() => setActiveModule('attribution')}
-              className={`px-3 py-1.5 font-bold tracking-wider uppercase border transition flex items-center space-x-1.5 ${
-                activeModule === 'attribution'
-                  ? 'bg-safety-orange text-concrete-950 border-safety-orange'
-                  : 'bg-concrete-950 text-concrete-400 border-concrete-800 hover:text-concrete-200'
-              }`}
-            >
-              <span>01 ATTRIBUTION</span>
-              <span className="text-[9px] opacity-75">{(activeSuspect?.attribution_score_pct || 93.1).toFixed(1)}</span>
-            </button>
-
-            <button
-              onClick={() => setActiveModule('sar')}
-              className={`px-3 py-1.5 font-bold tracking-wider uppercase border transition flex items-center space-x-1.5 ${
-                activeModule === 'sar'
-                  ? 'bg-safety-orange text-concrete-950 border-safety-orange'
-                  : 'bg-concrete-950 text-concrete-400 border-concrete-800 hover:text-concrete-200'
-              }`}
-            >
-              <span>02 SAR PIPELINE</span>
-              <span className="text-[9px] opacity-75">67.2%</span>
-            </button>
-
-            <button
-              onClick={() => setActiveModule('drift')}
-              className={`px-3 py-1.5 font-bold tracking-wider uppercase border transition flex items-center space-x-1.5 ${
-                activeModule === 'drift'
-                  ? 'bg-safety-orange text-concrete-950 border-safety-orange'
-                  : 'bg-concrete-950 text-concrete-400 border-concrete-800 hover:text-concrete-200'
-              }`}
-            >
-              <span>03 DRIFT / FAY</span>
-              <span className="text-[9px] opacity-75">±3.5KM</span>
-            </button>
-
-            <button
-              onClick={() => setActiveModule('cfar')}
-              className={`px-3 py-1.5 font-bold tracking-wider uppercase border transition flex items-center space-x-1.5 ${
-                activeModule === 'cfar'
-                  ? 'bg-safety-orange text-concrete-950 border-safety-orange'
-                  : 'bg-concrete-950 text-concrete-400 border-concrete-800 hover:text-concrete-200'
-              }`}
-            >
-              <span>04 CFAR RADAR</span>
-              <span className="text-[9px] opacity-75">18.5dB</span>
-            </button>
-
-            <button
-              onClick={() => setActiveModule('responder')}
-              className={`px-3 py-1.5 font-bold tracking-wider uppercase border transition flex items-center space-x-1.5 ${
-                activeModule === 'responder'
-                  ? 'bg-safety-orange text-concrete-950 border-safety-orange'
-                  : 'bg-concrete-950 text-concrete-400 border-concrete-800 hover:text-concrete-200'
-              }`}
-            >
-              <span>05 RESPONDER</span>
-              <span className="text-[9px] opacity-75">T+4.1H</span>
-            </button>
-          </div>
-
-          {/* Active Workspace Module Container (Only 1 Active at a Time!) */}
-          <div className="space-y-3">
-            {activeModule === 'attribution' && (
-              <ForensicAttributionPanel
-                suspect={activeSuspect}
-                onOpenDossier={() => setIsDossierOpen(true)}
-              />
-            )}
-
-            {activeModule === 'sar' && (
+          {/* Contextual Center Drawer for Deep Modular Investigation */}
+          {activeModule === 'sar' && (
+            <div className="pt-1">
               <SARWorkspace
                 detectionResult={detectionResult}
                 onDetectionComplete={handleDetectionComplete}
               />
-            )}
+            </div>
+          )}
 
-            {activeModule === 'drift' && (
-              <SpillDataSheet
-                scenarioData={scenarioData}
-                detectionResult={detectionResult}
-              />
-            )}
-
-            {activeModule === 'cfar' && (
-              <CFARRadarPanel
+          {activeModule === 'ais' && (
+            <div className="pt-1">
+              <CorrelationMatrix
+                suspects={scenarioData?.ranked_suspects || []}
                 darkVessels={scenarioData?.dark_vessels || []}
+                selectedVessel={activeCandidate}
                 onSelectVessel={handleSelectVessel}
+                aisProvenance={scenarioData?.ais_provenance}
+                isHistoricalReal={scenarioData?.is_historical_real}
+                coverageAvailable={scenarioData?.coverage_available}
+                releaseWindow={scenarioData?.release_window}
               />
-            )}
+            </div>
+          )}
 
-            {activeModule === 'responder' && (
+          {activeModule === 'responder' && (
+            <div className="pt-1">
               <ResponderVectorPanel
-                responderRoute={scenarioData?.responder_route}
+                responderRoute={scenarioData?.responder_route || scenarioData?.responder_routing || detectionResult?.responder_route || detectionResult?.responder_routing}
               />
-            )}
-          </div>
+            </div>
+          )}
+
         </div>
+
+        {/* Right Column: Contextual Intelligence Panel (380px) */}
+        <ContextualIntelPanel
+          activeModule={activeModule}
+          scenarioData={scenarioData}
+          detectionResult={detectionResult}
+          selectedVessel={activeCandidate}
+          onSelectVessel={handleSelectVessel}
+          onOpenDossier={() => setIsDossierOpen(true)}
+          onSwitchModule={(mod) => setActiveModule(mod)}
+        />
+
       </main>
 
-      {/* Footer Technical Bar */}
-      <footer className="border-t border-concrete-700 bg-concrete-950 px-4 py-2.5 font-mono text-[11px] text-concrete-500 flex flex-wrap items-center justify-between gap-2">
-        <div className="flex items-center space-x-2">
-          <span className="bg-concrete-900 border border-concrete-700 text-safety-orange px-1.5 py-0.5 text-[10px] font-bold">
-            AEGISSEA C2
-          </span>
-          <span>SIH PS 26143 // NTRO PROTOTYPE WORKSTATION</span>
-        </div>
+      {/* 04 Bottom Signature Interactive Evidence Chain Banner */}
+      <EvidenceChainBanner
+        scenarioData={scenarioData}
+        detectionResult={detectionResult}
+        activePhase={activeModule}
+        onSelectPhase={(phase) => setActiveModule(phase)}
+      />
 
-        <div className="flex items-center space-x-3 text-concrete-400 text-[10px]">
-          <span>ZENODO HELD-OUT: 67.25% IoU</span>
-          <span>•</span>
-          <span>CONTROLLED BENCHMARK: 100% RANK-1</span>
-          <span>•</span>
-          <span>SENSITIVITY ENVELOPE: ±3.5 KM</span>
-        </div>
-      </footer>
-
-      {/* Incident Evidence & Audit Dossier Modal */}
+      {/* 05 7-Page Maritime Incident Evidence & Investigation Dossier Modal */}
       <DossierModal
         isOpen={isDossierOpen}
         onClose={() => setIsDossierOpen(false)}
         scenarioData={scenarioData}
         detectionResult={detectionResult}
-        suspect={activeSuspect}
+        suspect={activeCandidate}
       />
+
     </div>
   );
 }

@@ -8,110 +8,117 @@
 :root {
   --font-space-grotesk: 'Space Grotesk', system-ui, -apple-system, sans-serif;
   --font-jetbrains-mono: 'JetBrains Mono', monospace;
-  --color-safety-orange: #ff5500;
-  --color-concrete-950: #08090c;
-  --color-concrete-900: #0e1117;
-  --color-concrete-800: #1c222e;
-  --color-border-grid: #252d3d;
+  --color-tactical-base: #070B0F;
+  --color-tactical-navy: #0B1117;
+  --color-tactical-panel: #101820;
+  --color-tactical-border: #26333D;
+  --color-tactical-amber: #F5A623;
+  --color-tactical-cyan: #25C7D9;
+  --color-tactical-red: #E05252;
+  --color-tactical-green: #46C77A;
 }
 
-/* Pure Brutalist Zero-Radius Architecture */
+/* Sharp Tactical C2 2px Geometry */
 * {
-  border-radius: 0px !important;
+  border-radius: 2px;
 }
 
 body {
-  color: #f0f2f5;
-  background-color: #08090c;
+  color: #E7EDF2;
+  background-color: #070B0F;
   min-height: 100vh;
   font-family: var(--font-space-grotesk);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
   -webkit-font-smoothing: antialiased;
 }
 
-/* Subtle Technical Drafting Grid */
+/* Restrained Technical Radar Drafting Grid */
 .bg-technical-grid {
-  background-image: linear-gradient(to right, rgba(37, 45, 61, 0.25) 1px, transparent 1px),
-                    linear-gradient(to bottom, rgba(37, 45, 61, 0.25) 1px, transparent 1px);
+  background-image: linear-gradient(to right, rgba(38, 51, 61, 0.3) 1px, transparent 1px),
+                    linear-gradient(to bottom, rgba(38, 51, 61, 0.3) 1px, transparent 1px);
   background-size: 32px 32px;
 }
 
-/* Mechanical Physical Buttons */
+/* Operational C2 Mechanical Buttons */
 .brutalist-btn {
   position: relative;
-  transition: all 0.08s ease-in-out;
-  border: 1px solid #3e475c;
-  box-shadow: 3px 3px 0px #141820;
+  transition: all 0.1s ease-in-out;
+  border: 1px solid #26333D;
+  background-color: #101820;
+  color: #E7EDF2;
+  box-shadow: 2px 2px 0px #070B0F;
 }
 
 .brutalist-btn:hover {
   transform: translate(-1px, -1px);
-  box-shadow: 4px 4px 0px #ff5500;
-  border-color: #ff5500;
+  box-shadow: 3px 3px 0px #F5A623;
+  border-color: #F5A623;
 }
 
 .brutalist-btn:active {
-  transform: translate(2px, 2px);
-  box-shadow: 1px 1px 0px #ff5500;
+  transform: translate(1px, 1px);
+  box-shadow: 0px 0px 0px #F5A623;
 }
 
 .brutalist-btn-orange {
-  background-color: #ff5500;
-  color: #08090c;
+  background-color: #F5A623;
+  color: #070B0F;
   font-weight: 700;
-  border: 1px solid #ff5500;
-  box-shadow: 3px 3px 0px #08090c;
+  border: 1px solid #F5A623;
+  box-shadow: 2px 2px 0px #070B0F;
+  transition: all 0.1s ease-in-out;
 }
 
 .brutalist-btn-orange:hover {
-  background-color: #e64d00;
+  background-color: #e6951b;
   transform: translate(-1px, -1px);
-  box-shadow: 4px 4px 0px #f0f2f5;
+  box-shadow: 3px 3px 0px #E7EDF2;
 }
 
-/* Technical Stamp Labels */
+/* Technical Tactical Stamp Labels */
 .stamp-tag {
   font-family: var(--font-jetbrains-mono);
   font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   padding: 2px 6px;
   border: 1px solid currentColor;
 }
 
 /* Structural Dividers */
 .brutalist-border {
-  border: 1px solid #252d3d;
+  border: 1px solid #26333D;
 }
 
 .brutalist-border-b {
-  border-bottom: 1px solid #252d3d;
+  border-bottom: 1px solid #26333D;
 }
 
 .brutalist-border-r {
-  border-right: 1px solid #252d3d;
+  border-right: 1px solid #26333D;
 }
 
 .brutalist-border-thick {
-  border: 2px solid #3e475c;
+  border: 2px solid #26333D;
 }
 
-/* Custom Industrial Leaflet Map Styling */
+/* Leaflet Map Dark Nautical Radar Styling */
 .leaflet-container {
   width: 100%;
   height: 100%;
   z-index: 10;
-  background: #090c10 !important;
+  background: #070B0F !important;
   font-family: var(--font-jetbrains-mono) !important;
 }
 
 .leaflet-popup-content-wrapper {
-  background: #0e1117 !important;
-  color: #f0f2f5 !important;
-  border: 2px solid #3e475c !important;
-  box-shadow: 6px 6px 0px #08090c !important;
+  background: #0B1117 !important;
+  color: #E7EDF2 !important;
+  border: 1px solid #26333D !important;
+  box-shadow: 4px 4px 0px #070B0F !important;
   padding: 0 !important;
+  border-radius: 2px !important;
 }
 
 .leaflet-popup-content {
@@ -120,22 +127,77 @@ body {
 }
 
 .leaflet-popup-tip {
-  background: #0e1117 !important;
-  border: 1px solid #3e475c !important;
+  background: #0B1117 !important;
+  border: 1px solid #26333D !important;
 }
 
-/* Clean minimal brutalist scrollbars */
+/* Clean minimal tactical scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #08090c;
-  border-left: 1px solid #1c222e;
+  background: #070B0F;
+  border-left: 1px solid #101820;
 }
 ::-webkit-scrollbar-thumb {
-  background: #252d3d;
+  background: #26333D;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #ff5500;
+  background: #F5A623;
+}
+
+/* =========================================================================
+   PRINT / EXPORT PDF STYLES // WHITE FORENSIC EVIDENCE DOSSIER MODE
+   ========================================================================= */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  /* Hide tactical console UI, sidebars, headers, map, and interactive buttons */
+  header, main, footer, .print\:hidden, aside, nav {
+    display: none !important;
+  }
+
+  /* Expand modal container for clean printable document layout */
+  .fixed.inset-0 {
+    position: static !important;
+    background: transparent !important;
+    padding: 0 !important;
+    backdrop-filter: none !important;
+  }
+
+  .max-w-5xl, .bg-concrete-900, .bg-tactical-navy {
+    max-width: 100% !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    overflow: visible !important;
+    max-height: none !important;
+  }
+
+  #printable-dossier {
+    padding: 0 !important;
+    margin: 0 !important;
+    color: #000000 !important;
+  }
+
+  .dossier-page {
+    page-break-after: always !important;
+    break-after: page !important;
+    min-height: 98vh !important;
+    border: 1px solid #222222 !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    padding: 24px !important;
+    margin-bottom: 24px !important;
+  }
+
+  .dossier-page:last-child {
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+  }
 }

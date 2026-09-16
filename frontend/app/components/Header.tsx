@@ -28,7 +28,7 @@ export default function Header({ apiStatus, isBackendConnected }: HeaderProps) {
       <div className="flex items-center space-x-6">
         <div className="flex items-center space-x-2 px-3 py-1.5 rounded-full bg-ocean-900/60 border border-ocean-700 text-xs">
           <Radar className="w-4 h-4 text-cyan-400 animate-spin" style={{ animationDuration: '6s' }} />
-          <span className="text-slate-300">Region: <strong className="text-cyan-300">Mumbai High (19.4°N, 71.3°E)</strong></span>
+          <span className="text-slate-300">Region: <strong className="text-cyan-300">Active Operational Sector</strong></span>
         </div>
 
         <div className="flex items-center space-x-2 text-xs">

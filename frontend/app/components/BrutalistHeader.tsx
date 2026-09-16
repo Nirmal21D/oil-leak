@@ -1,21 +1,30 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { formatCoordinate } from '../utils/geo';
 
 interface BrutalistHeaderProps {
   apiStatus: string;
   isBackendConnected: boolean;
   telemetry?: any;
-  incidentCoordinates?: { lat: number; lon: number };
+  incidentCoordinates?: { lat: number; lon: number } | null;
+  sectorLabel?: string;
+  incidentId?: string;
   onOpenDossier?: () => void;
+  onRunGolden?: () => void;
+  isProcessing?: boolean;
 }
 
 export default function BrutalistHeader({
   apiStatus,
   isBackendConnected,
   telemetry,
-  incidentCoordinates = { lat: 19.4733, lon: 71.2097 },
+  incidentCoordinates = null,
+  sectorLabel,
+  incidentId = 'STANDBY',
   onOpenDossier,
+  onRunGolden,
+  isProcessing = false,
 }: BrutalistHeaderProps) {
   const [timeUtc, setTimeUtc] = useState<string>('00:00:00 UTC');
 
@@ -29,70 +38,78 @@ export default function BrutalistHeader({
     return () => clearInterval(interval);
   }, []);
 
+  const coordsFormatted = incidentCoordinates
+    ? formatCoordinate(incidentCoordinates.lat, incidentCoordinates.lon)
+    : 'STANDBY // AWAITING SENSOR INGEST';
+
   return (
-    <header className="bg-concrete-950 border-b-2 border-concrete-700 text-concrete-100 select-none sticky top-0 z-50">
-      {/* Sleek Single-Row Tactical Header */}
-      <div className="px-4 py-2 bg-concrete-900 flex flex-wrap items-center justify-between gap-y-2 text-xs font-mono">
-        {/* Left: System Nomenclature */}
+    <header className="bg-tactical-navy border-b border-tactical-border text-tactical-text select-none sticky top-0 z-50 font-mono">
+      <div className="px-3 lg:px-4 py-2 flex flex-wrap items-center justify-between gap-y-2 text-xs">
+        
+        {/* Left: Tactical Console Title & Scene Verification Badge */}
         <div className="flex items-center space-x-3">
-          <div className="bg-safety-orange text-concrete-950 px-2 py-0.5 font-bold tracking-wider text-[11px]">
-            AEGISSEA // PS-26143
-          </div>
-          <span className="text-concrete-500 font-bold hidden sm:inline">|</span>
-          <span className="text-concrete-300 font-mono tracking-tight text-[11px] hidden sm:inline">
-            NTRO MARITIME RECONNAISSANCE & ATTRIBUTION C2
-          </span>
-          <span className="stamp-tag border-concrete-600 text-concrete-400 text-[9px] hidden md:inline">
-            CLASSIFIED // PROTOTYPE
-          </span>
-        </div>
-
-        {/* Center: Incident Geo Reference */}
-        <div className="flex items-center space-x-2 text-[11px] tracking-tight">
-          <span className="text-concrete-500">INCIDENT:</span>
-          <strong className="text-concrete-100 font-bold">INC-001</strong>
-          <span className="text-concrete-600 font-bold">•</span>
-          <span className="text-concrete-400 font-mono">{incidentCoordinates.lat.toFixed(4)}° N / {incidentCoordinates.lon.toFixed(4)}° E</span>
-          <span className="text-concrete-600 font-bold">•</span>
-          <span className="text-concrete-400">MUMBAI HIGH SECTOR</span>
-        </div>
-
-        {/* Right: Environmental Telemetry, Engine State & UTC Chrono */}
-        <div className="flex items-center space-x-3 text-[11px]">
-          {/* Quick Telemetry Indicators */}
-          <div className="hidden xl:flex items-center space-x-3 text-concrete-400 border-r border-concrete-800 pr-3">
-            <div>
-              <span className="text-concrete-600">WIND:</span>{' '}
-              <strong className="text-concrete-200">{telemetry?.wind || '14.0 kts'}</strong>
-            </div>
-            <div>
-              <span className="text-concrete-600">CUR:</span>{' '}
-              <strong className="text-concrete-200">{telemetry?.current || '1.2 kts'}</strong>
-            </div>
-            <div>
-              <span className="text-concrete-600">TIDE:</span>{' '}
-              <strong className="text-safety-orange">M2</strong>
-            </div>
-          </div>
-
-          {/* GPU Hardware Status */}
-          <div className="flex items-center space-x-1.5 border border-concrete-700 px-2 py-0.5 bg-concrete-950">
-            <span
-              className={`w-2 h-2 inline-block ${
-                isBackendConnected ? 'bg-safety-orange animate-pulse' : 'bg-concrete-600'
-              }`}
-            />
-            <span className="text-concrete-400">GPU:</span>
-            <span className={`font-bold ${isBackendConnected ? 'text-concrete-100' : 'text-concrete-400'}`}>
-              {isBackendConnected ? 'RTX 3050 CUDA' : 'OFFLINE'}
+          <div className="flex items-center space-x-2">
+            <span className="font-extrabold text-sm tracking-tight text-tactical-text font-display uppercase">
+              AEGISSEA
+            </span>
+            <span className="text-tactical-dim font-bold">/</span>
+            <span className="text-tactical-muted font-bold text-xs tracking-wider uppercase">
+              MARITIME INTELLIGENCE & TACTICAL C2
             </span>
           </div>
 
-          {/* UTC Clock */}
-          <div className="border border-concrete-700 px-2 py-0.5 bg-concrete-950 text-concrete-300 font-bold tracking-wider font-mono">
-            {timeUtc}
+          <span className={`stamp-tag ${isBackendConnected && incidentCoordinates ? 'border-tactical-green text-tactical-green' : 'border-tactical-dim text-tactical-dim'} bg-tactical-panel text-[9px] px-2 py-0.5`}>
+            {incidentCoordinates ? '● SCENE ACTIVE' : '○ STANDBY'}
+          </span>
+        </div>
+
+        {/* Center: Incident Coordinates & Observation Timestamp */}
+        <div className="flex items-center space-x-3 text-[11px] text-tactical-muted">
+          <div>
+            <span className="text-tactical-dim">INCIDENT: </span>
+            <strong className="text-tactical-amber font-bold">{incidentId}</strong>
+          </div>
+          <span className="text-tactical-border">•</span>
+          <div>
+            <span className="text-tactical-dim">LOCUS: </span>
+            <strong className="text-tactical-text">{coordsFormatted}</strong>
+          </div>
+          <span className="text-tactical-border hidden md:inline">•</span>
+          <div className="hidden md:block">
+            <span className="text-tactical-dim">ACQUIRED: </span>
+            <span className="text-tactical-text">
+              {telemetry?.metocean_query_time || (incidentCoordinates ? 'AWAITING SENSOR INGEST' : 'STANDBY')}
+            </span>
           </div>
         </div>
+
+        {/* Right: Quick Action Triggers & System Clock */}
+        <div className="flex items-center space-x-2">
+          {onRunGolden && (
+            <button
+              onClick={onRunGolden}
+              disabled={isProcessing}
+              className="brutalist-btn-orange px-2.5 py-1 text-[11px] font-black uppercase tracking-wider flex items-center space-x-1 cursor-pointer disabled:opacity-50"
+            >
+              <span>{isProcessing ? '⚡ PROCESSING...' : '⚡ RUN GOLDEN: 00111 (NOAA AIS)'}</span>
+            </button>
+          )}
+
+          {onOpenDossier && (
+            <button
+              onClick={onOpenDossier}
+              className="brutalist-btn px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider hover:text-tactical-amber cursor-pointer"
+            >
+              <span>[ 📄 EVIDENCE DOSSIER ]</span>
+            </button>
+          )}
+
+          <div className="hidden lg:flex items-center space-x-1.5 pl-2 text-tactical-muted text-[11px] border-l border-tactical-border">
+            <span className="text-tactical-dim">CLOCK:</span>
+            <span className="text-tactical-text font-bold">{timeUtc}</span>
+          </div>
+        </div>
+
       </div>
     </header>
   );

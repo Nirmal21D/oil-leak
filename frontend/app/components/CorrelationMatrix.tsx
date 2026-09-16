@@ -7,6 +7,10 @@ interface CorrelationMatrixProps {
   darkVessels?: any[];
   selectedVessel?: any;
   onSelectVessel?: (vessel: any) => void;
+  aisProvenance?: any;
+  isHistoricalReal?: boolean;
+  coverageAvailable?: boolean;
+  releaseWindow?: any;
 }
 
 export default function CorrelationMatrix({
@@ -14,7 +18,13 @@ export default function CorrelationMatrix({
   darkVessels = [],
   selectedVessel,
   onSelectVessel,
+  aisProvenance,
+  isHistoricalReal,
+  coverageAvailable = true,
+  releaseWindow,
 }: CorrelationMatrixProps) {
+  const isReal = isHistoricalReal || suspects.some((s) => s.is_historical_real);
+
   return (
     <section id="ais" className="bg-concrete-950 border-2 border-concrete-700 p-5 font-mono select-none text-concrete-100 space-y-4">
       {/* Section Header */}
@@ -29,28 +39,76 @@ export default function CorrelationMatrix({
         </div>
         <div className="flex items-center space-x-2 text-[10px]">
           <span className="stamp-tag border-safety-orange text-safety-orange font-bold">
-            PS 26143 3-TERM WEIGHTED: 45 / 30 / 25
+            AEGISSEA ATTRIBUTION SCORE (ENGINEERING METHODOLOGY)
           </span>
-          <span className="stamp-tag border-concrete-700 text-concrete-400">
-            CONTROLLED BENCHMARK: 100% RANK-1
+          <span className={`stamp-tag ${isReal ? 'border-cyan-500 text-cyan-400' : 'border-concrete-700 text-concrete-400'}`}>
+            {isReal ? 'NOAA MARINECADASTRE INGESTION' : 'SYNTHETIC BENCHMARK'}
           </span>
         </div>
       </div>
 
-      {/* Mandatory Truth-in-Labeling Disclaimer Banner */}
-      <div className="bg-concrete-900 border-l-4 border-safety-orange p-3 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-        <div className="space-y-0.5">
-          <span className="text-safety-orange font-bold uppercase tracking-wider">
-            [!] MANDATORY TRUTH-IN-LABELING NOTICE // SYNTHETIC AIS BENCHMARK
+      {/* Dynamic Provenance / Truth-in-Labeling Banner */}
+      {isReal ? (
+        <div className="bg-concrete-900 border-l-4 border-cyan-500 p-3 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div className="space-y-0.5">
+            <div className="flex items-center space-x-2">
+              <span className="text-cyan-400 font-bold uppercase tracking-wider">
+                REAL HISTORICAL AIS // NOAA MARINECADASTRE
+              </span>
+              <span className="stamp-tag border-cyan-500 text-cyan-400 text-[9px] bg-cyan-950/40">
+                ARCHIVE VERIFIED
+              </span>
+            </div>
+            <p className="text-concrete-400 text-[11px]">
+              VESSELS ANALYZED:{' '}
+              <strong className="text-concrete-100">
+                {aisProvenance?.unique_vessels_tracked || suspects.length}
+              </strong>{' '}
+              • AIS PINGS:{' '}
+              <strong className="text-concrete-100">
+                {aisProvenance?.raw_pings_scanned ? aisProvenance.raw_pings_scanned.toLocaleString() : '—'}
+              </strong>{' '}
+              • RELEASE WINDOW:{' '}
+              <strong className="text-concrete-100">
+                {releaseWindow?.start_utc
+                  ? `${releaseWindow.start_utc.slice(0, 16).replace('T', ' ')} to ${releaseWindow.end_utc.slice(0, 16).replace('T', ' ')} UTC`
+                  : 'T -6.5H (DRIFT MODEL PARAMETER)'}
+              </strong>
+            </p>
+          </div>
+          <span className="stamp-tag border-cyan-600 text-cyan-300 text-[10px] shrink-0 self-start sm:self-auto">
+            PROVENANCE AUDIT TRAIL
           </span>
-          <p className="text-concrete-400 text-[11px]">
-            All candidate vessels utilize synthetic MMSI IDs (<code className="text-concrete-200">SYN-AIS-XXXX</code>) per SIH PS 26143 rules. Scores represent an uncalibrated heuristic investigative priority index to direct Coast Guard boarding, not a legal accusation of guilt.
-          </p>
         </div>
-        <span className="stamp-tag border-concrete-600 text-concrete-300 text-[10px] shrink-0 self-start sm:self-auto">
-          ZERO REAL-VESSEL COLLISION
-        </span>
-      </div>
+      ) : coverageAvailable === false ? (
+        <div className="bg-concrete-900 border-l-4 border-slate-600 p-3 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div className="space-y-0.5">
+            <span className="text-concrete-300 font-bold uppercase tracking-wider">
+              AIS COVERAGE UNAVAILABLE — ATTRIBUTION NOT PERFORMED
+            </span>
+            <p className="text-concrete-400 text-[11px]">
+              No historical AIS archives cataloged for this geographic tile. Synthetic fallback is suppressed.
+            </p>
+          </div>
+          <span className="stamp-tag border-slate-700 text-slate-400 text-[10px] shrink-0">
+            COVERAGE GAP
+          </span>
+        </div>
+      ) : (
+        <div className="bg-concrete-900 border-l-4 border-safety-orange p-3 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div className="space-y-0.5">
+            <span className="text-safety-orange font-bold uppercase tracking-wider">
+              [!] DEMONSTRATION NOTICE // SYNTHETIC AIS BENCHMARK
+            </span>
+            <p className="text-concrete-400 text-[11px]">
+              Candidate vessels utilize synthetic MMSI IDs (<code className="text-concrete-200">SYN-AIS-XXXX</code>) for demonstration. Scores represent an engineering investigative ranking, not legal proof of guilt.
+            </p>
+          </div>
+          <span className="stamp-tag border-concrete-600 text-concrete-300 text-[10px] shrink-0 self-start sm:self-auto">
+            DEMO MODE
+          </span>
+        </div>
+      )}
 
       {/* Industrial Ranking Table */}
       <div className="overflow-x-auto border border-concrete-800">
@@ -58,24 +116,25 @@ export default function CorrelationMatrix({
           <thead>
             <tr className="text-[10px] text-concrete-400 border-b-2 border-concrete-700 uppercase tracking-widest bg-concrete-900 font-mono">
               <th className="p-3">RANK</th>
-              <th className="p-3">CANDIDATE VESSEL / MMSI</th>
+              <th className="p-3">ATTRIBUTION CANDIDATE / MMSI</th>
               <th className="p-3">TYPE</th>
               <th className="p-3">CPA DIST</th>
               <th className="p-3">S_PROX (45%)</th>
               <th className="p-3">S_TRAJ (30%)</th>
               <th className="p-3">S_ANOM (25%)</th>
-              <th className="p-3 text-right">PRIORITY SCORE</th>
+              <th className="p-3 text-right">AEGISSEA SCORE</th>
               <th className="p-3 text-center">ACTION</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-concrete-800 font-mono">
             {suspects.map((vessel: any, idx: number) => {
               const vName = vessel.vessel_name || vessel.name;
-              const vId = vessel.vessel_id || `SYN-AIS-${idx + 1}`;
+              const vId = vessel.vessel_id || `MMSI-${vessel.mmsi || idx + 1}`;
               const dist = vessel.distance_km ?? vessel.cpa_dist_km ?? 1.8;
-              const scorePct = vessel.attribution_score_pct ?? 85.0;
-              const isPrimary = scorePct >= 80.0 || idx === 0;
+              const scorePct = vessel.attribution_score_pct ?? vessel.confidence_score ?? 85.0;
+              const isPrimary = scorePct >= 75.0 || idx === 0;
               const isSelected = selectedVessel && (selectedVessel.vessel_id === vId || selectedVessel.vessel_name === vName);
+              const vesselIsReal = vessel.is_historical_real ?? isReal;
 
               return (
                 <tr
@@ -100,8 +159,12 @@ export default function CorrelationMatrix({
                         <div className={`text-xs ${isPrimary ? 'text-concrete-100 font-black' : 'text-concrete-300'}`}>
                           {vName}
                         </div>
-                        <div className="text-[10px] text-concrete-500 font-normal">
-                          {vId} • <span className="stamp-tag border-concrete-700 text-concrete-400 text-[8px]">SYNTHETIC DEMO</span>
+                        <div className="text-[10px] text-concrete-500 font-normal flex items-center space-x-1.5">
+                          <span>{vId}</span>
+                          <span>•</span>
+                          <span className={`stamp-tag text-[8px] ${vesselIsReal ? 'border-cyan-600 text-cyan-400' : 'border-concrete-700 text-concrete-400'}`}>
+                            {vesselIsReal ? 'NOAA AIS' : 'SYNTHETIC'}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -133,7 +196,7 @@ export default function CorrelationMatrix({
 
                   <td className="p-3 text-right font-mono">
                     <div className="text-sm font-black text-safety-orange">
-                      {scorePct.toFixed(1)}
+                      {scorePct.toFixed(1)} <span className="text-[10px] text-concrete-400 font-normal">/ 100</span>
                     </div>
                     <span className="text-[9px] text-concrete-500 uppercase">
                       {isPrimary ? 'INVESTIGATIVE LEAD' : 'CLEARED'}

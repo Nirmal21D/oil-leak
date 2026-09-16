@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { formatCoordinate } from '../utils/geo';
 
 interface IncidentHeroProps {
   areaKm2?: number;
@@ -12,26 +13,28 @@ interface IncidentHeroProps {
   compactness?: number;
   estimatedMassTons?: number;
   thicknessUm?: number;
-  observedCoordinates?: { lat: number; lon: number };
-  releaseCoordinates?: { lat: number; lon: number };
+  observedCoordinates?: { lat: number; lon: number } | null;
+  releaseCoordinates?: { lat: number; lon: number } | null;
   sourceLabel?: string;
+  incidentTitle?: string;
   onOpenDossier?: () => void;
   onSelectModule?: (moduleId: string) => void;
 }
 
 export default function IncidentHero({
-  areaKm2 = 14.8,
-  volumeM3 = 31.8,
-  sensitivityKm = 3.5,
-  priorityScore = 93.1,
-  primarySuspectName = 'MT OCEAN PIONEER',
-  perimeterKm = 28.4,
-  compactness = 0.23,
-  estimatedMassTons = 27.7,
-  thicknessUm = 2.12,
-  observedCoordinates = { lat: 19.4120, lon: 71.3250 },
-  releaseCoordinates = { lat: 19.4733, lon: 71.2097 },
+  areaKm2,
+  volumeM3,
+  sensitivityKm,
+  priorityScore,
+  primarySuspectName,
+  perimeterKm,
+  compactness,
+  estimatedMassTons,
+  thicknessUm,
+  observedCoordinates = null,
+  releaseCoordinates = null,
   sourceLabel = 'MODEL-DERIVED',
+  incidentTitle,
   onOpenDossier,
   onSelectModule,
 }: IncidentHeroProps) {
@@ -44,15 +47,24 @@ export default function IncidentHero({
             INCIDENT 01
           </span>
           <span className="font-extrabold text-concrete-100 uppercase tracking-tight text-xs">
-            MUMBAI HIGH PLATFORM BASIN // ARABIAN SEA
+            {incidentTitle || (observedCoordinates ? `OFFSHORE OIL SPILL // ${formatCoordinate(observedCoordinates.lat, observedCoordinates.lon)}` : 'STANDBY // AWAITING SENSOR INGEST')}
           </span>
-          <span className="text-concrete-600 hidden sm:inline">•</span>
-          <span className="text-concrete-400 text-[11px] hidden sm:inline font-mono">
-            {observedCoordinates.lat.toFixed(4)}° N, {observedCoordinates.lon.toFixed(4)}° E (T0) →{' '}
-            <strong className="text-safety-orange">
-              {releaseCoordinates.lat.toFixed(4)}° N, {releaseCoordinates.lon.toFixed(4)}° E (T-6.5H)
-            </strong>
-          </span>
+          {observedCoordinates && (
+            <>
+              <span className="text-concrete-600 hidden sm:inline">•</span>
+              <span className="text-concrete-400 text-[11px] hidden sm:inline font-mono">
+                {formatCoordinate(observedCoordinates.lat, observedCoordinates.lon)} (T0)
+                {releaseCoordinates && (
+                  <>
+                    {' → '}
+                    <strong className="text-safety-orange">
+                      {formatCoordinate(releaseCoordinates.lat, releaseCoordinates.lon)} (T-6.5H)
+                    </strong>
+                  </>
+                )}
+              </span>
+            </>
+          )}
           <span className="stamp-tag border-safety-orange text-safety-orange text-[9px] uppercase">
             {sourceLabel}
           </span>
@@ -79,12 +91,19 @@ export default function IncidentHero({
               01 // SURFACE AREA (±15%)
             </span>
             <div className="text-xl xl:text-2xl font-black text-concrete-100 font-display mt-0.5">
-              {areaKm2.toFixed(1)}{' '}
-              <span className="text-xs font-bold text-concrete-500 font-mono">KM²</span>
+              {areaKm2 != null ? (
+                <>
+                  {Number(areaKm2).toFixed(1)}{' '}
+                  <span className="text-xs font-bold text-concrete-500 font-mono">KM²</span>
+                </>
+              ) : (
+                <span className="text-sm text-concrete-500 font-mono">STANDBY</span>
+              )}
             </div>
           </div>
           <span className="text-[10px] text-concrete-600 hidden xl:block text-right">
-            PERIMETER: {perimeterKm.toFixed(1)} KM<br />COMPACTNESS: {compactness.toFixed(2)}
+            {perimeterKm != null ? `PERIMETER: ${Number(perimeterKm).toFixed(1)} KM` : 'PERIMETER: —'}<br />
+            {compactness != null ? `COMPACTNESS: ${Number(compactness).toFixed(2)}` : 'COMPACTNESS: —'}
           </span>
         </div>
 
@@ -98,12 +117,19 @@ export default function IncidentHero({
               02 // EST. VOLUME (FAY)
             </span>
             <div className="text-xl xl:text-2xl font-black text-concrete-100 font-display mt-0.5">
-              {volumeM3.toFixed(1)}{' '}
-              <span className="text-xs font-bold text-concrete-500 font-mono">M³</span>
+              {volumeM3 != null ? (
+                <>
+                  {Number(volumeM3).toFixed(1)}{' '}
+                  <span className="text-xs font-bold text-concrete-500 font-mono">M³</span>
+                </>
+              ) : (
+                <span className="text-sm text-concrete-500 font-mono">STANDBY</span>
+              )}
             </div>
           </div>
           <span className="text-[10px] text-concrete-600 hidden xl:block text-right">
-            ~{estimatedMassTons.toFixed(1)} METRIC TONS<br />THICKNESS: {thicknessUm.toFixed(2)} μM
+            {estimatedMassTons != null ? `~${Number(estimatedMassTons).toFixed(1)} METRIC TONS` : '~— METRIC TONS'}<br />
+            {thicknessUm != null ? `THICKNESS: ${Number(thicknessUm).toFixed(2)} μM` : 'THICKNESS: —'}
           </span>
         </div>
 
@@ -117,12 +143,18 @@ export default function IncidentHero({
               03 // SENSITIVITY ENVELOPE
             </span>
             <div className="text-xl xl:text-2xl font-black text-safety-orange font-display mt-0.5">
-              ±{sensitivityKm.toFixed(1)}{' '}
-              <span className="text-xs font-bold text-safety-orange/70 font-mono">KM</span>
+              {sensitivityKm != null ? (
+                <>
+                  ±{Number(sensitivityKm).toFixed(1)}{' '}
+                  <span className="text-xs font-bold text-safety-orange/70 font-mono">KM</span>
+                </>
+              ) : (
+                <span className="text-sm text-concrete-500 font-mono">STANDBY</span>
+              )}
             </div>
           </div>
           <span className="text-[10px] text-concrete-600 hidden xl:block text-right">
-            ±20% WIND/CUR VAR<br />MAX DISPL: 3.18 KM
+            ±20% WIND/CUR VAR<br />MAX DISPL: {sensitivityKm != null ? '3.18 KM' : '—'}
           </span>
         </div>
 
@@ -136,13 +168,19 @@ export default function IncidentHero({
               04 // PRIORITY INDEX (HEURISTIC)
             </span>
             <div className="text-xl xl:text-2xl font-black text-safety-orange font-display mt-0.5">
-              {priorityScore.toFixed(1)}{' '}
-              <span className="text-xs font-bold text-concrete-500 font-mono">/ 100</span>
+              {priorityScore != null ? (
+                <>
+                  {Number(priorityScore).toFixed(1)}{' '}
+                  <span className="text-xs font-bold text-concrete-500 font-mono">/ 100</span>
+                </>
+              ) : (
+                <span className="text-sm text-concrete-500 font-mono">STANDBY</span>
+              )}
             </div>
           </div>
           <span className="text-[10px] text-concrete-400 hidden xl:block text-right font-bold">
-            LEAD: {primarySuspectName}<br />
-            <span className="text-[9px] text-concrete-600 font-normal">NOT GUILT</span>
+            LEAD: {primarySuspectName || 'STANDBY'}<br />
+            <span className="text-[9px] text-concrete-500 font-normal">HEURISTIC RANKING</span>
           </span>
         </div>
       </div>
