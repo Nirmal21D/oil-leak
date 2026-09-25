@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Upload, Sparkles, Cpu, Satellite, CheckCircle2, AlertTriangle, ShieldCheck, Database } from 'lucide-react';
 import { formatDataUrl } from '../utils/geo';
+import { API_BASE } from '../utils/api';
 
 interface SARUploadControlProps {
   onDetectionComplete?: (result: any) => void;
@@ -19,7 +20,7 @@ export default function SARUploadControl({ onDetectionComplete }: SARUploadContr
 
   // Fetch available real Sentinel-1 scenes from the Zenodo dataset via backend
   useEffect(() => {
-    fetch('http://localhost:8000/api/v1/dataset/scenes')
+    fetch(`${API_BASE}/api/v1/dataset/scenes`)
       .then((res) => res.json())
       .then((data) => {
         if (data && (data.oil || data.lookalike || data.no_oil)) {
@@ -43,7 +44,7 @@ export default function SARUploadControl({ onDetectionComplete }: SARUploadContr
   const handleAnalyzeZenodoScene = async () => {
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:8000/api/v1/dataset/analyze-scene', {
+      const res = await fetch(`${API_BASE}/api/v1/dataset/analyze-scene`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -78,7 +79,7 @@ export default function SARUploadControl({ onDetectionComplete }: SARUploadContr
     formData.append('file', selectedFile);
 
     try {
-      const res = await fetch('http://localhost:8000/api/v1/detect', {
+      const res = await fetch(`${API_BASE}/api/v1/detect`, {
         method: 'POST',
         body: formData,
       });
@@ -88,7 +89,7 @@ export default function SARUploadControl({ onDetectionComplete }: SARUploadContr
       setDetectionResult(data);
       if (onDetectionComplete) onDetectionComplete(data);
     } catch (err) {
-      alert('Failed to connect to GPU backend engine.');
+      alert('Failed to connect to backend engine.');
     } finally {
       setLoading(false);
     }

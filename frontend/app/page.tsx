@@ -14,6 +14,7 @@ import DataProvenanceStrip from './components/DataProvenanceStrip';
 import DossierModal from './components/DossierModal';
 import ReconstructionReplayBar from './components/ReconstructionReplayBar';
 import { formatCoordinate } from './utils/geo';
+import { API_BASE } from './utils/api';
 
 type ModuleType = 'overview' | 'sar' | 'drift' | 'ais' | 'responder';
 
@@ -65,7 +66,7 @@ export default function Home() {
   const fetchScenarioData = async () => {
     try {
       setLoading(true);
-      const res = await fetch('http://127.0.0.1:8000/api/v1/scenario/current');
+      const res = await fetch(`${API_BASE}/api/v1/scenario/current`);
       if (res.ok) {
         const data = await res.json();
         setScenarioData(data);
@@ -95,7 +96,7 @@ export default function Home() {
   const handleRunGoldenPreset = async () => {
     try {
       setIsProcessing(true);
-      const res = await fetch('http://127.0.0.1:8000/api/v1/detect/preset/00111', {
+      const res = await fetch(`${API_BASE}/api/v1/detect/preset/00111`, {
         method: 'POST',
       });
       if (res.ok) {

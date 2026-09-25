@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { API_BASE } from '../utils/api';
 
 interface AIBriefingModalProps {
   isOpen: boolean;
@@ -29,7 +30,7 @@ export default function AIBriefingModal({
         payload.detected_slick = detectionResult.morphology;
       }
 
-      const res = await fetch('http://127.0.0.1:8000/api/v1/briefing/generate', {
+      const res = await fetch(`${API_BASE}/api/v1/briefing/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload || {}),

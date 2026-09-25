@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { formatCoordinate } from '../utils/geo';
+import { API_BASE } from '../utils/api';
 
 const MapContainer = dynamic(
   () => import('react-leaflet').then((mod) => mod.MapContainer),
@@ -81,7 +82,7 @@ export default function GlobalTheaterView({
     async function fetchScenes() {
       try {
         setLoading(true);
-        const res = await fetch('http://127.0.0.1:8000/api/v1/theater/scenes');
+        const res = await fetch(`${API_BASE}/api/v1/theater/scenes`);
         if (res.ok) {
           const data = await res.json();
           setScenes(data);

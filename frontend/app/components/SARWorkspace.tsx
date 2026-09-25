@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { formatCoordinateShort, formatDataUrl } from '../utils/geo';
+import { API_BASE } from '../utils/api';
 
 interface SARWorkspaceProps {
   detectionResult?: any;
@@ -37,7 +38,7 @@ export default function SARWorkspace({
     formData.append('file', fileToRun);
 
     try {
-      const res = await fetch('http://localhost:8000/api/v1/detect', {
+      const res = await fetch(`${API_BASE}/api/v1/detect`, {
         method: 'POST',
         body: formData,
       });
@@ -58,7 +59,7 @@ export default function SARWorkspace({
       if (onDetectionComplete) onDetectionComplete(data);
     } catch (err: any) {
       console.error(err);
-      setInputError(err.message || 'Failed to connect to GPU backend engine. Is FastAPI running on port 8000?');
+      setInputError(err.message || 'Failed to connect to backend engine.');
     } finally {
       setLoading(false);
     }
@@ -71,7 +72,7 @@ export default function SARWorkspace({
     formData.append('image_path', 'data/02_Test_images_and_ground_truth/Images/Oil/00111.tif');
 
     try {
-      const res = await fetch('http://localhost:8000/api/v1/detect', {
+      const res = await fetch(`${API_BASE}/api/v1/detect`, {
         method: 'POST',
         body: formData,
       });
@@ -85,7 +86,7 @@ export default function SARWorkspace({
       if (onDetectionComplete) onDetectionComplete(data);
     } catch (err: any) {
       console.error(err);
-      setInputError(err.message || 'Failed to connect to GPU backend engine. Is FastAPI running on port 8000?');
+      setInputError(err.message || 'Failed to connect to backend engine.');
     } finally {
       setLoading(false);
     }
@@ -112,7 +113,7 @@ export default function SARWorkspace({
     setLoading(true);
     setInputError(null);
     try {
-      const res = await fetch(`http://localhost:8000/api/v1/detect/preset/${presetId}`, {
+      const res = await fetch(`${API_BASE}/api/v1/detect/preset/${presetId}`, {
         method: 'POST',
       });
       if (!res.ok) {
@@ -123,7 +124,7 @@ export default function SARWorkspace({
       if (onDetectionComplete) onDetectionComplete(data);
     } catch (err: any) {
       console.error(err);
-      setInputError(err.message || 'Failed to connect to GPU backend engine. Is FastAPI running on port 8000?');
+      setInputError(err.message || 'Failed to connect to backend engine.');
     } finally {
       setLoading(false);
     }
