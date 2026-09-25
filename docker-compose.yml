@@ -29,7 +29,7 @@ services:
       - "127.0.0.1:8000:8000"
     volumes:
       - ./data:/app/data
-      - ./backend/app/models/weights:/app/backend/app/models/weights
+      - ./backend:/app/backend
     environment:
       - FASTAPI_ENV=production
       - API_PORT=8000
