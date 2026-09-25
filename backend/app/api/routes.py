@@ -564,6 +564,8 @@ async def run_oil_detection(
     overlay_img.save(buffer, format="PNG")
     mask_b64 = f"data:image/png;base64,{base64.b64encode(buffer.getvalue()).decode('utf-8')}"
 
+    clean_stem = Path(image_name).stem.upper()
+
     # 5. Geodetic separation & scenario generation
     if is_confirmed_spill and geo_info["georeferenced"] and slick_centroid is not None:
         detected_location = {
@@ -572,8 +574,7 @@ async def run_oil_detection(
             "lon": slick_centroid["lon"]
         }
 
-        # Step 4: Do not change existing drift model's physical semantics;
-        # pass real slick_centroid as the observed T0 geographic starting locus
+        # Real georeferenced scenario
         scenario_update = _generate_incident_scenario(
             origin_lat=slick_centroid["lat"],
             origin_lon=slick_centroid["lon"],
@@ -586,23 +587,103 @@ async def run_oil_detection(
                 "estimated_mass_tons": morphology["estimated_mass_tons"],
                 "weathering_stage": morphology["weathering_stage"]
             },
-            scenario_id=f"INC-USER-{abs(hash(image_name)) % 10000:04d}",
+            scenario_id=f"INC-SAR-{clean_stem}",
             scene_timestamp=scene_timestamp
         )
-    else:
+    elif is_confirmed_spill:
+        # Unreferenced detection: update scenario state to this specific image so 00111 is not retained
         detected_location = None
-        scenario_update = None
-        if not is_confirmed_spill:
-            morphology = {
-                "area_sq_m": 0.0,
-                "area_sq_km": 0.0,
-                "perimeter_km": 0.0,
-                "compactness_index": 0.0,
-                "estimated_thickness_um": 0.0,
-                "estimated_volume_m3": 0.0,
-                "estimated_mass_tons": 0.0,
-                "weathering_stage": "Verified Clean Sea"
+        scenario_update = {
+            "scenario_id": f"INC-RAW-{clean_stem}",
+            "status": "unreferenced_detection",
+            "is_georeferenced": False,
+            "sector": f"UNREFERENCED SCENE // {clean_stem}",
+            "location": None,
+            "detected_slick": {
+                "area_sq_km": morphology.get("area_sq_km", 0.0),
+                "perimeter_km": morphology.get("perimeter_km"),
+                "compactness_index": morphology.get("compactness_index"),
+                "estimated_thickness_um": morphology.get("estimated_thickness_um", 10.0),
+                "estimated_volume_m3": morphology.get("estimated_volume_m3", 0.0),
+                "estimated_mass_tons": morphology.get("estimated_mass_tons", 0.0),
+                "weathering_stage": morphology.get("weathering_stage", "Fresh Hydrocarbon Discharge"),
+                "is_computed_morphology": True,
+                "morphology_status": "COMPUTED_FROM_SAR_MASK"
+            },
+            "telemetry": {
+                "wind": "—",
+                "current": "—",
+                "sea_temp_c": None,
+                "wave_height_m": None,
+                "drift_vector": "GEODETIC METADATA REQUIRED",
+                "metocean_source": "UNREFERENCED_RASTER",
+                "metocean_source_label": "AWAITING GEODETIC METADATA",
+                "is_time_matched": False,
+                "metocean_datasets": [],
+                "metocean_query_time": scene_timestamp.isoformat() if scene_timestamp else datetime.now(timezone.utc).isoformat()
+            },
+            "reconstructed_release": None,
+            "hindcast_trajectory": [],
+            "drift_cone_polygon": [],
+            "ranked_suspects": [],
+            "dark_vessels": [],
+            "responder_route": None,
+            "infrastructure_proximity": None,
+            "ais_provenance": {
+                "provider": "NONE",
+                "coverage_status": "AWAITING_GEODETIC_COORDINATES",
+                "raw_pings_scanned": 0,
+                "unique_vessels_tracked": 0,
+                "query_window_utc": "N/A"
             }
+        }
+    else:
+        # Clean sea (no oil detected)
+        detected_location = None
+        morphology = {
+            "area_sq_m": 0.0,
+            "area_sq_km": 0.0,
+            "perimeter_km": 0.0,
+            "compactness_index": 0.0,
+            "estimated_thickness_um": 0.0,
+            "estimated_volume_m3": 0.0,
+            "estimated_mass_tons": 0.0,
+            "weathering_stage": "Verified Clean Sea"
+        }
+        scenario_update = {
+            "scenario_id": f"INC-CLEAN-{clean_stem}",
+            "status": "clean_sea",
+            "is_georeferenced": geo_info.get("georeferenced", False),
+            "sector": f"VERIFIED CLEAN SEA // {clean_stem}",
+            "location": slick_centroid if geo_info.get("georeferenced", False) else None,
+            "detected_slick": None,
+            "telemetry": {
+                "wind": "—",
+                "current": "—",
+                "sea_temp_c": None,
+                "wave_height_m": None,
+                "drift_vector": "NO ANOMALOUS DISCHARGE",
+                "metocean_source": "STANDBY",
+                "metocean_source_label": "VERIFIED CLEAN SEA",
+                "is_time_matched": False,
+                "metocean_datasets": [],
+                "metocean_query_time": scene_timestamp.isoformat() if scene_timestamp else datetime.now(timezone.utc).isoformat()
+            },
+            "reconstructed_release": None,
+            "hindcast_trajectory": [],
+            "drift_cone_polygon": [],
+            "ranked_suspects": [],
+            "dark_vessels": [],
+            "responder_route": None,
+            "infrastructure_proximity": None,
+            "ais_provenance": {
+                "provider": "NONE",
+                "coverage_status": "NO_DISCHARGE_DETECTED",
+                "raw_pings_scanned": 0,
+                "unique_vessels_tracked": 0,
+                "query_window_utc": "N/A"
+            }
+        }
 
     display_location = None
     if slick_centroid and "lat" in slick_centroid and "lon" in slick_centroid:
@@ -791,7 +872,7 @@ def analyze_dataset_scene(req: AnalyzeSceneRequest):
     overlay_pil = Image.fromarray(overlay_rgb, mode="RGBA")
     buf = io.BytesIO()
     overlay_pil.save(buf, format="PNG")
-    mask_b64 = base64.b64encode(buf.getvalue()).decode("utf-8")
+    mask_b64 = f"data:image/png;base64,{base64.b64encode(buf.getvalue()).decode('utf-8')}"
 
     # Extract real georeferencing and acquisition timestamp directly from GeoTIFF
     try:
@@ -814,6 +895,9 @@ def analyze_dataset_scene(req: AnalyzeSceneRequest):
     if derived_area_km2 is not None:
         morphology["area_sq_km"] = derived_area_km2
 
+    clean_cat = target.get('category', 'oil').upper()
+    clean_sid = str(target.get('scene_id', 'UNKNOWN')).upper()
+
     # Generate full C2 scenario update starting strictly from observed T0 slick centroid
     if oil_cnt >= 500 and geo_info.get("georeferenced", False) and slick_centroid is not None:
         scenario_update = _generate_incident_scenario(
@@ -828,11 +912,81 @@ def analyze_dataset_scene(req: AnalyzeSceneRequest):
                 "estimated_mass_tons": morphology["estimated_mass_tons"],
                 "weathering_stage": morphology["weathering_stage"]
             },
-            scenario_id=f"INC-ZENODO-{target['category'].upper()}-{target['scene_id']}",
+            scenario_id=f"INC-ZENODO-{clean_cat}-{clean_sid}",
             scene_timestamp=scene_timestamp
         )
+    elif oil_cnt >= 500:
+        # Unreferenced incident from dataset
+        scenario_update = {
+            "scenario_id": f"INC-ZENODO-{clean_cat}-{clean_sid}",
+            "status": "unreferenced_detection",
+            "is_georeferenced": False,
+            "sector": f"UNREFERENCED SCENE // {clean_sid}",
+            "location": None,
+            "detected_slick": morphology,
+            "telemetry": {
+                "wind": "—",
+                "current": "—",
+                "sea_temp_c": None,
+                "wave_height_m": None,
+                "drift_vector": "GEODETIC METADATA REQUIRED",
+                "metocean_source": "UNREFERENCED_RASTER",
+                "metocean_source_label": "AWAITING GEODETIC METADATA",
+                "is_time_matched": False,
+                "metocean_datasets": [],
+                "metocean_query_time": scene_timestamp.isoformat() if scene_timestamp else datetime.now(timezone.utc).isoformat()
+            },
+            "reconstructed_release": None,
+            "hindcast_trajectory": [],
+            "drift_cone_polygon": [],
+            "ranked_suspects": [],
+            "dark_vessels": [],
+            "responder_route": None,
+            "infrastructure_proximity": None,
+            "ais_provenance": {
+                "provider": "NONE",
+                "coverage_status": "AWAITING_GEODETIC_COORDINATES",
+                "raw_pings_scanned": 0,
+                "unique_vessels_tracked": 0,
+                "query_window_utc": "N/A"
+            }
+        }
     else:
-        scenario_update = None
+        # Clean sea or lookalike
+        scenario_update = {
+            "scenario_id": f"INC-ZENODO-{clean_cat}-{clean_sid}",
+            "status": "clean_sea",
+            "is_georeferenced": geo_info.get("georeferenced", False),
+            "sector": f"VERIFIED CLEAN SEA // {clean_sid}",
+            "location": slick_centroid if geo_info.get("georeferenced", False) else None,
+            "detected_slick": None,
+            "telemetry": {
+                "wind": "—",
+                "current": "—",
+                "sea_temp_c": None,
+                "wave_height_m": None,
+                "drift_vector": "NO ANOMALOUS DISCHARGE",
+                "metocean_source": "STANDBY",
+                "metocean_source_label": "VERIFIED CLEAN SEA",
+                "is_time_matched": False,
+                "metocean_datasets": [],
+                "metocean_query_time": scene_timestamp.isoformat() if scene_timestamp else datetime.now(timezone.utc).isoformat()
+            },
+            "reconstructed_release": None,
+            "hindcast_trajectory": [],
+            "drift_cone_polygon": [],
+            "ranked_suspects": [],
+            "dark_vessels": [],
+            "responder_route": None,
+            "infrastructure_proximity": None,
+            "ais_provenance": {
+                "provider": "NONE",
+                "coverage_status": "NO_DISCHARGE_DETECTED",
+                "raw_pings_scanned": 0,
+                "unique_vessels_tracked": 0,
+                "query_window_utc": "N/A"
+            }
+        }
 
     res_dict = {
         "status": "success",

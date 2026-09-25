@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { formatCoordinate } from '../utils/geo';
+import { formatCoordinate, formatDataUrl } from '../utils/geo';
 
 interface ContextualIntelPanelProps {
   activeModule: 'overview' | 'sar' | 'drift' | 'ais' | 'responder';
@@ -92,6 +92,11 @@ export default function ContextualIntelPanel({
       : (activeCandidate?.max_course_change_deg ? `${Number(activeCandidate.max_course_change_deg).toFixed(0)}° COURSE DEVIATION` : 'STANDARD TRANSIT BASELINE')
   );
 
+  const isIncidentLoaded = Boolean(
+    detectionResult ||
+    (scenarioData && scenarioData.status !== 'standby' && (scenarioData.scenario_id || scenarioData.incident_id || scenarioData.location))
+  );
+
   return (
     <aside className="w-full lg:w-[380px] shrink-0 bg-tactical-navy border border-tactical-border flex flex-col justify-between font-mono text-xs select-none">
       
@@ -110,13 +115,52 @@ export default function ContextualIntelPanel({
                 INCIDENT INTELLIGENCE
               </h3>
             </div>
-            <span className="stamp-tag border-tactical-amber text-tactical-amber text-[9px] px-1.5 py-0.2">
-              ACTIVE FIX
+            <span className={`stamp-tag ${isIncidentLoaded ? 'border-tactical-amber text-tactical-amber' : 'border-tactical-dim text-tactical-dim'} text-[9px] px-1.5 py-0.2`}>
+              {isIncidentLoaded ? 'ACTIVE FIX' : 'STANDBY'}
             </span>
           </div>
 
-          {/* Slick Footprint Telemetry */}
-          <div className="bg-tactical-panel border border-tactical-border p-3 space-y-2">
+          {!isIncidentLoaded ? (
+            /* Unified Empty State: replaces scattered "N/A", "Standby", "Not Available", "Awaiting Ingest" */
+            <div className="bg-tactical-panel border border-tactical-border p-5 text-center space-y-3 font-mono">
+              <div className="w-10 h-10 mx-auto rounded-full bg-tactical-navy border border-tactical-border flex items-center justify-center text-tactical-amber text-lg">
+                📡
+              </div>
+              <div className="space-y-1">
+                <h4 className="text-xs font-bold text-tactical-text uppercase tracking-wider">
+                  STANDBY — AWAITING SENSOR INGEST
+                </h4>
+                <p className="text-[11px] text-tactical-muted leading-relaxed max-w-[280px] mx-auto">
+                  No active incident loaded. Ingest a Sentinel-1 SAR scene or launch Golden Scenario (00111) to trigger automated morphology, metocean drift hindcast, and AIS contact attribution.
+                </p>
+              </div>
+
+              <div className="pt-2 border-t border-tactical-border/60 text-left space-y-2 text-[10px]">
+                <span className="text-tactical-dim uppercase block font-bold">PIPELINE SUBSYSTEMS:</span>
+                <div className="space-y-1 text-tactical-muted">
+                  <div className="flex items-center justify-between">
+                    <span>• SAR Segmentation (ResNet-34 U-Net)</span>
+                    <span className="text-tactical-green">ONLINE</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>• MetOcean Advection (CMEMS)</span>
+                    <span className="text-tactical-green">ONLINE</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>• AIS Correlation (NOAA AccessAIS)</span>
+                    <span className="text-tactical-green">ONLINE</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>• Port Proximity (NGA Pub 150)</span>
+                    <span className="text-tactical-green">ONLINE</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* Slick Footprint Telemetry */}
+              <div className="bg-tactical-panel border border-tactical-border p-3 space-y-2">
             <div className="flex items-center justify-between text-[10px] text-tactical-dim border-b border-tactical-border/60 pb-1">
               <span>DETECTED HYDROCARBON SLICK</span>
               <span className="text-tactical-amber font-bold">SENTINEL-1A C-SAR</span>
@@ -304,6 +348,8 @@ export default function ContextualIntelPanel({
               )}
             </div>
           </div>
+            </>
+          )}
         </div>
       )}
 
@@ -354,7 +400,7 @@ export default function ContextualIntelPanel({
             <div className="bg-tactical-base border border-tactical-border p-2 flex items-center justify-center max-h-48 overflow-hidden">
               {detectionResult?.mask_base64 ? (
                 <img
-                  src={detectionResult.mask_base64}
+                  src={formatDataUrl(detectionResult.mask_base64)}
                   alt="SAR Segmentation Mask"
                   className="max-h-44 object-contain"
                 />

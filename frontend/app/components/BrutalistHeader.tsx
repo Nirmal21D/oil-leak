@@ -48,11 +48,13 @@ export default function BrutalistHeader({
     ? formatCoordinate(incidentCoordinates.lat, incidentCoordinates.lon)
     : 'STANDBY // AWAITING SENSOR INGEST';
 
+  const hasActiveIncident = Boolean(incidentCoordinates && incidentId && incidentId !== 'STANDBY' && incidentId !== 'OFFLINE');
+
   return (
     <header className="bg-tactical-navy border-b border-tactical-border text-tactical-text select-none sticky top-0 z-50 font-mono">
       <div className="px-3 lg:px-4 py-2 flex flex-wrap items-center justify-between gap-y-2 text-xs">
         
-        {/* Left: Tactical Console Title & Scene Verification Badge */}
+        {/* Left: Tactical Console Title & Clean Consolidated Standby Badge */}
         <div className="flex items-center space-x-3">
           <div className="flex items-center space-x-2">
             <span className="font-extrabold text-sm tracking-tight text-tactical-text font-display uppercase">
@@ -64,59 +66,43 @@ export default function BrutalistHeader({
             </span>
           </div>
 
-          <span className={`stamp-tag ${isBackendConnected && incidentCoordinates ? 'border-tactical-green text-tactical-green' : 'border-tactical-dim text-tactical-dim'} bg-tactical-panel text-[9px] px-2 py-0.5`}>
-            {incidentCoordinates ? '● SCENE ACTIVE' : '○ STANDBY'}
+          <span className={`stamp-tag ${hasActiveIncident ? 'border-tactical-green text-tactical-green' : 'border-tactical-dim text-tactical-dim'} bg-tactical-panel text-[9px] px-2 py-0.5`}>
+            {hasActiveIncident ? '● SCENE ACTIVE' : '○ STANDBY — AWAITING SENSOR INGEST'}
           </span>
         </div>
 
-        {/* Center: Incident Coordinates & Observation Timestamp */}
+        {/* Center: Incident Coordinates & Observation Timestamp (Only when active) */}
         <div className="flex items-center space-x-3 text-[11px] text-tactical-muted">
-          <div>
-            <span className="text-tactical-dim">INCIDENT: </span>
-            <strong className="text-tactical-amber font-bold">{incidentId}</strong>
-          </div>
-          <span className="text-tactical-border">•</span>
-          <div>
-            <span className="text-tactical-dim">LOCUS: </span>
-            <strong className="text-tactical-text">{coordsFormatted}</strong>
-          </div>
-          <span className="text-tactical-border hidden md:inline">•</span>
-          <div className="hidden md:block">
-            <span className="text-tactical-dim">ACQUIRED: </span>
-            <span className="text-tactical-text">
-              {telemetry?.metocean_query_time || (incidentCoordinates ? 'AWAITING SENSOR INGEST' : 'STANDBY')}
-            </span>
-          </div>
+          {hasActiveIncident ? (
+            <>
+              <div>
+                <span className="text-tactical-dim">INCIDENT: </span>
+                <strong className="text-tactical-amber font-bold">{incidentId}</strong>
+              </div>
+              <span className="text-tactical-border">•</span>
+              <div>
+                <span className="text-tactical-dim">LOCUS: </span>
+                <strong className="text-tactical-text">{coordsFormatted}</strong>
+              </div>
+              <span className="text-tactical-border hidden md:inline">•</span>
+              <div className="hidden md:block">
+                <span className="text-tactical-dim">ACQUIRED: </span>
+                <span className="text-tactical-text">
+                  {telemetry?.metocean_query_time || 'TELEMETRY LOADED'}
+                </span>
+              </div>
+            </>
+          ) : (
+            <div className="hidden sm:flex items-center space-x-2 text-tactical-dim text-[10px]">
+              <span>SYSTEM READY</span>
+              <span>•</span>
+              <span>NOAA AIS / CMEMS / SENTINEL-1 FEEDS ONLINE</span>
+            </div>
+          )}
         </div>
 
         {/* Right: Quick Action Triggers & System Clock */}
         <div className="flex items-center space-x-2">
-          {/* Workstation View Switcher */}
-          <div className="flex items-center space-x-1 border border-tactical-border p-0.5 bg-tactical-base mr-1">
-            <button
-              onClick={() => onSwitchView && onSwitchView('c2')}
-              className={`px-2 py-0.5 text-[10px] font-black uppercase transition cursor-pointer ${
-                currentView === 'c2'
-                  ? 'bg-tactical-amber text-tactical-base font-bold'
-                  : 'text-tactical-muted hover:text-tactical-text'
-              }`}
-              title="Tactical Incident C2 Workstation"
-            >
-              🎯 INCIDENT C2
-            </button>
-            <button
-              onClick={() => onSwitchView && onSwitchView('theater')}
-              className={`px-2 py-0.5 text-[10px] font-black uppercase transition cursor-pointer ${
-                currentView === 'theater'
-                  ? 'bg-tactical-cyan text-tactical-base font-bold'
-                  : 'text-tactical-muted hover:text-tactical-text'
-              }`}
-              title="Global Maritime Incident Theater"
-            >
-              🌐 GLOBAL THEATER
-            </button>
-          </div>
-
           {onRunGolden && (
             <button
               onClick={onRunGolden}
@@ -124,15 +110,6 @@ export default function BrutalistHeader({
               className="brutalist-btn-orange px-2.5 py-1 text-[11px] font-black uppercase tracking-wider flex items-center space-x-1 cursor-pointer disabled:opacity-50"
             >
               <span>{isProcessing ? '⚡ PROCESSING...' : '⚡ RUN GOLDEN: 00111 (NOAA AIS)'}</span>
-            </button>
-          )}
-
-          {onOpenAIBriefing && (
-            <button
-              onClick={onOpenAIBriefing}
-              className="brutalist-btn px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-tactical-cyan hover:bg-tactical-cyan hover:text-tactical-base cursor-pointer"
-            >
-              <span>[ 🤖 AI BRIEFING ]</span>
             </button>
           )}
 

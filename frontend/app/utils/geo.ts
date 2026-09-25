@@ -40,3 +40,24 @@ export function deriveIncidentTitle(lat?: number | null, lon?: number | null): s
 
   return `OFFSHORE OIL SPILL // ${formatCoordinate(lat, lon)}`;
 }
+
+/**
+ * Ensures any base64 image or data URL is formatted properly for an <img> or ImageOverlay src.
+ * Prevents raw base64 strings from being treated as relative server paths (causing 404s),
+ * and prevents double 'data:image/png;base64,' prefixes.
+ */
+export function formatDataUrl(src?: string | null): string {
+  if (!src) return '';
+  const trimmed = src.trim();
+  if (
+    trimmed.startsWith('data:') ||
+    trimmed.startsWith('http://') ||
+    trimmed.startsWith('https://') ||
+    trimmed.startsWith('/') ||
+    trimmed.startsWith('blob:')
+  ) {
+    return trimmed;
+  }
+  return `data:image/png;base64,${trimmed}`;
+}
+

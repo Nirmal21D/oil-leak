@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { formatCoordinateShort } from '../utils/geo';
+import { formatCoordinateShort, formatDataUrl } from '../utils/geo';
 
 interface SARWorkspaceProps {
   detectionResult?: any;
@@ -108,12 +108,34 @@ export default function SARWorkspace({
     }
   };
 
+  const handleRunPreset = async (presetId: string) => {
+    setLoading(true);
+    setInputError(null);
+    try {
+      const res = await fetch(`http://localhost:8000/api/v1/detect/preset/${presetId}`, {
+        method: 'POST',
+      });
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => null);
+        throw new Error(errJson?.detail || `Detection failed on preset ${presetId}`);
+      }
+      const data = await res.json();
+      if (onDetectionComplete) onDetectionComplete(data);
+    } catch (err: any) {
+      console.error(err);
+      setInputError(err.message || 'Failed to connect to GPU backend engine. Is FastAPI running on port 8000?');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const morphology = detectionResult?.morphology;
-  const area = morphology?.area_sq_km !== undefined ? morphology.area_sq_km : 68.32;
-  const volume = morphology?.estimated_volume_m3 !== undefined ? morphology.estimated_volume_m3 : 17.7;
-  const centroidLat = morphology?.centroid_lat !== undefined ? morphology.centroid_lat : 28.9668;
-  const centroidLon = morphology?.centroid_lon !== undefined ? morphology.centroid_lon : -88.8937;
-  const acqTime = detectionResult?.acquisition_time_utc || '2018-04-23 00:01:49 UTC';
+  const area = morphology?.area_sq_km !== undefined ? Number(morphology.area_sq_km) : (detectionResult?.derived_area_km2 ?? 0.0);
+  const volume = morphology?.estimated_volume_m3 !== undefined ? Number(morphology.estimated_volume_m3) : 0.0;
+  const slickCentroid = detectionResult?.slick_centroid;
+  const centroidLat = slickCentroid?.lat ?? morphology?.centroid_lat ?? null;
+  const centroidLon = slickCentroid?.lon ?? morphology?.centroid_lon ?? null;
+  const acqTime = detectionResult?.acquisition_time_utc || detectionResult?.telemetry?.metocean_query_time || 'AWAITING SENSOR INGEST';
 
   return (
     <section id="sar" className="bg-concrete-950 border-2 border-concrete-700 p-5 font-mono select-none text-concrete-100 space-y-4">
@@ -167,23 +189,44 @@ export default function SARWorkspace({
             </label>
           </div>
 
-          {/* Action Trigger Block */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <button
-              onClick={handleRunGoldenScene}
-              disabled={loading}
-              className="brutalist-btn-orange py-2 px-3 text-xs tracking-wider uppercase font-bold flex items-center justify-center space-x-2 text-center"
-            >
-              <span>[ ⚡ RUN GOLDEN: 00111 (NOAA AIS) → ]</span>
-            </button>
+          {/* Action Trigger Block: Verified Presets & Demo */}
+          <div className="space-y-1.5">
+            <span className="text-[10px] text-concrete-400 font-bold uppercase tracking-wider block">
+              PRESET RADAR SCENES:
+            </span>
+            <div className="grid grid-cols-2 gap-1.5 text-[11px]">
+              <button
+                onClick={handleRunGoldenScene}
+                disabled={loading}
+                className="brutalist-btn-orange py-1.5 px-2 font-bold uppercase flex items-center justify-center space-x-1 cursor-pointer disabled:opacity-50"
+              >
+                <span>⚡ 00111 (GULF OF MEXICO)</span>
+              </button>
 
-            <button
-              onClick={handleLoadDemoImage}
-              disabled={loading}
-              className="brutalist-btn bg-concrete-800 hover:bg-concrete-700 text-concrete-200 py-2 px-3 text-xs tracking-wider uppercase font-bold text-center"
-            >
-              <span>[ RUN DEMO (SYNTHETIC) ]</span>
-            </button>
+              <button
+                onClick={() => handleRunPreset('00004')}
+                disabled={loading}
+                className="brutalist-btn bg-concrete-800 hover:bg-concrete-700 text-concrete-100 py-1.5 px-2 font-bold uppercase flex items-center justify-center space-x-1 cursor-pointer disabled:opacity-50 border border-concrete-600"
+              >
+                <span>⚡ 00004 (MEDITERRANEAN)</span>
+              </button>
+
+              <button
+                onClick={() => handleRunPreset('00000')}
+                disabled={loading}
+                className="brutalist-btn bg-concrete-800 hover:bg-concrete-700 text-concrete-100 py-1.5 px-2 font-bold uppercase flex items-center justify-center space-x-1 cursor-pointer disabled:opacity-50 border border-concrete-600"
+              >
+                <span>⚡ 00000 (CYPRUS COAST)</span>
+              </button>
+
+              <button
+                onClick={handleLoadDemoImage}
+                disabled={loading}
+                className="brutalist-btn bg-concrete-850 hover:bg-concrete-750 text-concrete-300 py-1.5 px-2 font-bold uppercase flex items-center justify-center space-x-1 cursor-pointer disabled:opacity-50 border border-concrete-700"
+              >
+                <span>⚡ DEMO (SYNTHETIC)</span>
+              </button>
+            </div>
           </div>
 
           {/* Input Error Alert */}
@@ -200,7 +243,7 @@ export default function SARWorkspace({
           <div className="min-h-[260px] border border-concrete-800 bg-concrete-950 flex items-center justify-center p-2 relative overflow-hidden">
             {detectionResult?.raw_sar_base64 ? (
               <img
-                src={detectionResult.raw_sar_base64}
+                src={formatDataUrl(detectionResult.raw_sar_base64)}
                 alt="Raw Sentinel-1 SAR Input"
                 className="max-h-[250px] w-auto object-contain rounded-sm"
               />
@@ -264,7 +307,7 @@ export default function SARWorkspace({
           <div className="min-h-[260px] border border-concrete-800 bg-concrete-950 flex items-center justify-center p-2 relative overflow-hidden">
             {detectionResult?.mask_base64 ? (
               <img
-                src={detectionResult.mask_base64}
+                src={formatDataUrl(detectionResult.mask_base64)}
                 alt="SAR Overlay Mask"
                 className="max-h-[250px] w-auto object-contain rounded-sm"
               />
@@ -316,7 +359,9 @@ export default function SARWorkspace({
           <div className="bg-concrete-950 p-3 border border-concrete-800">
             <span className="text-concrete-500 block text-[10px]">OBSERVED CENTROID</span>
             <strong className="text-concrete-100 font-mono text-sm font-black block truncate">
-              {formatCoordinateShort(centroidLat, centroidLon)}
+              {centroidLat != null && centroidLon != null
+                ? formatCoordinateShort(centroidLat, centroidLon)
+                : (detectionResult ? 'UNREFERENCED' : 'STANDBY')}
             </strong>
             <span className="text-[9px] text-concrete-600 block mt-0.5">WGS-84 FIX</span>
           </div>

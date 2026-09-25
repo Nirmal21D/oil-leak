@@ -13,8 +13,6 @@ import EvidenceChainBanner from './components/EvidenceChainBanner';
 import DataProvenanceStrip from './components/DataProvenanceStrip';
 import DossierModal from './components/DossierModal';
 import ReconstructionReplayBar from './components/ReconstructionReplayBar';
-import GlobalTheaterView, { TheaterScene } from './components/GlobalTheaterView';
-import AIBriefingModal from './components/AIBriefingModal';
 import { formatCoordinate } from './utils/geo';
 
 type ModuleType = 'overview' | 'sar' | 'drift' | 'ais' | 'responder';
@@ -29,10 +27,6 @@ export default function Home() {
   const [timelineHour, setTimelineHour] = useState<number>(0);
   const [selectedVessel, setSelectedVessel] = useState<any>(null);
   const [isDossierOpen, setIsDossierOpen] = useState<boolean>(false);
-  const [isAIBriefingOpen, setIsAIBriefingOpen] = useState<boolean>(false);
-
-  // Top-Level Workstation View ('c2' | 'theater')
-  const [currentView, setCurrentView] = useState<'c2' | 'theater'>('c2');
 
   // Investigation Reconstruction Replay State
   const [isReplayOpen, setIsReplayOpen] = useState<boolean>(false);
@@ -131,7 +125,29 @@ export default function Home() {
       setScenarioData(res.scenario_update);
       if (res.scenario_update.ranked_suspects && res.scenario_update.ranked_suspects.length > 0) {
         setSelectedVessel(res.scenario_update.ranked_suspects[0]);
+      } else {
+        setSelectedVessel(null);
       }
+    } else {
+      const cleanStem = (res.image_name || 'SCENE').replace(/\.[^/.]+$/, '').toUpperCase();
+      const isOil = (res.oil_pixel_count || 0) >= 500;
+      setScenarioData({
+        scenario_id: isOil ? `INC-RAW-${cleanStem}` : `INC-CLEAN-${cleanStem}`,
+        status: isOil ? 'unreferenced_detection' : 'clean_sea',
+        sector: isOil ? `UNREFERENCED SCENE // ${cleanStem}` : `VERIFIED CLEAN SEA // ${cleanStem}`,
+        location: null,
+        detected_slick: isOil ? res.morphology : null,
+        reconstructed_release: null,
+        ranked_suspects: [],
+        dark_vessels: [],
+        responder_route: null,
+        telemetry: {
+          metocean_query_time: res.acquisition_time_utc || new Date().toISOString(),
+          wind: '—',
+          current: '—',
+        }
+      });
+      setSelectedVessel(null);
     }
   };
 
@@ -221,40 +237,6 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, [isReplayOpen, isReplayPlaying, replayStep, replaySpeed]);
 
-  const handleLoadTheaterScene = async (scene: TheaterScene) => {
-    try {
-      setIsProcessing(true);
-      setCurrentView('c2');
-      if (scene.preset_id && !scene.preset_id.startsWith('INC-')) {
-        const res = await fetch(`http://127.0.0.1:8000/api/v1/detect/preset/${scene.preset_id}`, {
-          method: 'POST',
-        });
-        if (res.ok) {
-          const data = await res.json();
-          setDetectionResult(data);
-          if (data.scenario_update) {
-            setScenarioData(data.scenario_update);
-            if (data.scenario_update.ranked_suspects?.length > 0) {
-              setSelectedVessel(data.scenario_update.ranked_suspects[0]);
-            }
-          }
-        }
-      } else if (scene.scene_id.startsWith('INC-')) {
-        const res = await fetch(`http://127.0.0.1:8000/api/v1/incidents/${scene.scene_id}`);
-        if (res.ok) {
-          const data = await res.json();
-          setScenarioData(data);
-          if (data.ranked_suspects?.length > 0) {
-            setSelectedVessel(data.ranked_suspects[0]);
-          }
-        }
-      }
-    } catch (err) {
-      console.error('Failed to load theater scene into C2:', err);
-    } finally {
-      setIsProcessing(false);
-    }
-  };
 
   const activeCandidate =
     selectedVessel ||
@@ -294,35 +276,25 @@ export default function Home() {
         incidentCoordinates={observedCoordinates}
         incidentId={scenarioData?.scenario_id || (isBackendConnected ? 'STANDBY' : 'OFFLINE')}
         onOpenDossier={() => setIsDossierOpen(true)}
-        onOpenAIBriefing={() => setIsAIBriefingOpen(true)}
         onRunGolden={handleRunGoldenPreset}
         isProcessing={isProcessing}
-        currentView={currentView}
-        onSwitchView={(v) => setCurrentView(v)}
       />
 
-      {currentView === 'theater' ? (
-        <GlobalTheaterView
-          onLoadSceneInC2={handleLoadTheaterScene}
-          onReturnToC2={() => setCurrentView('c2')}
-        />
-      ) : (
-        <>
-          {/* 02 Persistent Data Feeds Telemetry Strip */}
-          <DataProvenanceStrip
-            scenarioData={scenarioData}
-            detectionResult={detectionResult}
-          />
+      {/* 02 Persistent Data Feeds Telemetry Strip */}
+      <DataProvenanceStrip
+        scenarioData={scenarioData}
+        detectionResult={detectionResult}
+      />
 
-          {/* 03 Global Evidence Chain Workflow Banner */}
-          <EvidenceChainBanner
-            scenarioData={scenarioData}
-            detectionResult={detectionResult}
-            activePhase={activeModule}
-            onSelectPhase={(phase) => setActiveModule(phase)}
-            onStartReplay={handleStartReplay}
-            isReplayOpen={isReplayOpen}
-          />
+      {/* 03 Global Evidence Chain Workflow Banner */}
+      <EvidenceChainBanner
+        scenarioData={scenarioData}
+        detectionResult={detectionResult}
+        activePhase={activeModule}
+        onSelectPhase={(phase) => setActiveModule(phase)}
+        onStartReplay={handleStartReplay}
+        isReplayOpen={isReplayOpen}
+      />
 
           {/* 04 Main Tactical Tri-Pane Workspace */}
           <main className="flex-1 flex flex-col lg:flex-row p-2 lg:p-3 gap-2 min-h-0">
@@ -469,32 +441,13 @@ export default function Home() {
 
           </main>
 
-          {/* 04 Bottom Signature Interactive Evidence Chain Banner */}
-          <EvidenceChainBanner
-            scenarioData={scenarioData}
-            detectionResult={detectionResult}
-            activePhase={activeModule}
-            onSelectPhase={(phase) => setActiveModule(phase)}
-          />
-        </>
-      )}
-
-      {/* 05 7-Page Maritime Incident Evidence & Investigation Dossier Modal */}
+      {/* 04 7-Page Maritime Incident Evidence & Investigation Dossier Modal */}
       <DossierModal
         isOpen={isDossierOpen}
         onClose={() => setIsDossierOpen(false)}
         scenarioData={scenarioData}
         detectionResult={detectionResult}
         suspect={activeCandidate}
-        onOpenAIBriefing={() => setIsAIBriefingOpen(true)}
-      />
-
-      {/* 06 Optional Downstream AI Incident Executive Briefing Modal */}
-      <AIBriefingModal
-        isOpen={isAIBriefingOpen}
-        onClose={() => setIsAIBriefingOpen(false)}
-        scenarioData={scenarioData}
-        detectionResult={detectionResult}
       />
 
     </div>

@@ -28,3 +28,12 @@ frontend/out/
 frontend/build/
 .DS_Store
 *.log
+
+diagrams/
+*.mp4
+.gitignore
+*.png
+*.svg
+*.md
+*.jpg
+*.drawio

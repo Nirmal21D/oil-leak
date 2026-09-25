@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import dynamic from 'next/dynamic';
-import { formatCoordinate, formatCoordinateShort } from '../utils/geo';
+import { formatCoordinate, formatCoordinateShort, formatDataUrl } from '../utils/geo';
 import {
   calculateInvestigationBounds,
   calculatePolylineChevrons,
@@ -533,11 +533,11 @@ export default function MapView({
         </button>
         <button
           onClick={handleTheaterC2}
-          title="Zoom out to theater context (Louisiana coastline, WPI candidate ports, and AIS fairway)"
+          title="Zoom out to regional context (Louisiana coastline, WPI candidate ports, and AIS fairway)"
           className="bg-tactical-navy/90 hover:bg-tactical-hover text-tactical-cyan border border-tactical-border hover:border-tactical-cyan px-2.5 py-1 font-bold transition shadow-md flex items-center space-x-1"
         >
           <span>🌐</span>
-          <span>THEATER C2</span>
+          <span>REGIONAL VIEW</span>
         </button>
         <div className="relative">
           <button
@@ -605,7 +605,7 @@ export default function MapView({
         {/* Optional Neural Segmentation Mask Overlay */}
         {layerMode === 'mask' && maskBase64 && sceneBounds && sceneBounds.length === 2 && (
           <ImageOverlay
-            url={`data:image/png;base64,${maskBase64}`}
+            url={formatDataUrl(maskBase64)}
             bounds={sceneBounds}
             opacity={0.7}
           />

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { formatCoordinate } from '../utils/geo';
+import { formatCoordinate, formatDataUrl } from '../utils/geo';
 
 interface DossierModalProps {
   isOpen: boolean;
@@ -64,7 +64,7 @@ export default function DossierModal({
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4 bg-concrete-950/95 backdrop-blur-md font-mono select-none">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-2 sm:p-4 bg-concrete-950/95 backdrop-blur-md font-mono select-none">
       <div className="bg-concrete-900 border-2 border-concrete-600 max-w-5xl w-full max-h-[94vh] overflow-y-auto shadow-[12px_12px_0px_#08090c] flex flex-col text-concrete-100">
         
         {/* Sticky Control Header (Hidden when printed) */}
@@ -84,15 +84,6 @@ export default function DossierModal({
           </div>
 
           <div className="flex items-center space-x-2">
-            {onOpenAIBriefing && (
-              <button
-                onClick={onOpenAIBriefing}
-                className="brutalist-btn bg-tactical-navy border border-tactical-cyan text-tactical-cyan hover:bg-tactical-cyan hover:text-tactical-base px-3 py-1.5 font-bold text-xs tracking-wider uppercase flex items-center space-x-1.5 cursor-pointer"
-              >
-                <span>🤖</span>
-                <span>[ AI EXECUTIVE BRIEFING ]</span>
-              </button>
-            )}
             <button
               onClick={handlePrint}
               className="brutalist-btn-orange px-3.5 py-1.5 font-black text-xs tracking-wider uppercase flex items-center space-x-1.5 cursor-pointer"
@@ -341,7 +332,7 @@ export default function DossierModal({
               <div className="flex items-center justify-center p-2 bg-concrete-950 border border-concrete-800 max-h-48 overflow-hidden print:bg-white print:border-gray-400">
                 {detectionResult?.mask_base64 ? (
                   <img
-                    src={detectionResult.mask_base64}
+                    src={formatDataUrl(detectionResult.mask_base64)}
                     alt="SAR Segmentation Mask"
                     className="max-h-44 object-contain"
                   />

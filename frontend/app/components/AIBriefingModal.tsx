@@ -70,7 +70,7 @@ export default function AIBriefingModal({
   const primaryCandidate = scenarioData?.ranked_suspects?.[0];
 
   return (
-    <div className="fixed inset-0 z-[120] flex items-center justify-center p-3 sm:p-6 bg-tactical-base/90 backdrop-blur-md font-mono select-none">
+    <div className="fixed inset-0 z-[10000] flex items-center justify-center p-3 sm:p-6 bg-tactical-base/90 backdrop-blur-md font-mono select-none">
       <div className="bg-tactical-panel border-2 border-tactical-border max-w-3xl w-full max-h-[92vh] overflow-y-auto shadow-[12px_12px_0px_#08090c] flex flex-col text-tactical-text">
         
         {/* Modal Header */}

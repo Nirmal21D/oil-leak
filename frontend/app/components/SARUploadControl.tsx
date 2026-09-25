@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Upload, Sparkles, Cpu, Satellite, CheckCircle2, AlertTriangle, ShieldCheck, Database } from 'lucide-react';
+import { formatDataUrl } from '../utils/geo';
 
 interface SARUploadControlProps {
   onDetectionComplete?: (result: any) => void;
@@ -322,7 +323,7 @@ export default function SARUploadControl({ onDetectionComplete }: SARUploadContr
               </span>
             </div>
             <div className="rounded-lg overflow-hidden border border-[#232d45] max-h-48 flex items-center justify-center bg-[#0b0e14]">
-              <img src={`data:image/png;base64,${detectionResult.mask_base64}`} alt="U-Net Mask" className="object-contain max-h-48" />
+              <img src={formatDataUrl(detectionResult.mask_base64)} alt="U-Net Mask" className="object-contain max-h-48" />
             </div>
           </div>
         </div>

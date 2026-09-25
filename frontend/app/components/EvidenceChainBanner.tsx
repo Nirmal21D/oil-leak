@@ -42,8 +42,8 @@ export default function EvidenceChainBanner({
       step: '01',
       phase: 'OBSERVED',
       title: 'SENTINEL-1 SAR',
-      highlight: areaVal != null ? `SLICK DETECTED · ${Number(areaVal).toFixed(1)} KM²` : (detectionResult ? 'SLICK SEGMENTED' : 'AWAITING SENSOR INGEST'),
-      detail: scenarioData?.telemetry?.metocean_query_time ? `${scenarioData.telemetry.metocean_query_time} · Raw Tensor` : (detectionResult ? 'Raw Tensor & Mask' : 'STANDBY'),
+      highlight: areaVal != null ? `SLICK DETECTED · ${Number(areaVal).toFixed(1)} KM²` : (detectionResult ? 'SLICK SEGMENTED' : 'SAR INGEST READY'),
+      detail: scenarioData?.telemetry?.metocean_query_time ? `${scenarioData.telemetry.metocean_query_time} · Raw Tensor` : (detectionResult ? 'Raw Tensor & Mask' : 'Sentinel-1 C-Band Level-1 GRD'),
       color: 'border-tactical-amber text-tactical-amber',
       accent: 'text-tactical-amber',
     },
@@ -55,7 +55,11 @@ export default function EvidenceChainBanner({
       highlight: 'MORPHOLOGY & FAY VOL.',
       detail: scenarioData?.location
         ? `${formatCoordinate(scenarioData.location.lat, scenarioData.location.lon)}${scenarioData.detected_slick?.estimated_volume_m3 ? ` · ${Number(scenarioData.detected_slick.estimated_volume_m3).toFixed(1)} M³` : ''}`
-        : (detectionResult?.slick_centroid ? `${formatCoordinate(detectionResult.slick_centroid.lat, detectionResult.slick_centroid.lon)}` : 'STANDBY'),
+        : (detectionResult?.slick_centroid
+            ? `${formatCoordinate(detectionResult.slick_centroid.lat, detectionResult.slick_centroid.lon)}`
+            : (scenarioData?.detected_slick?.estimated_volume_m3
+                ? `Unreferenced · ${Number(scenarioData.detected_slick.estimated_volume_m3).toFixed(1)} M³`
+                : 'Surface Spread & Oil Volume')),
       color: 'border-tactical-amber text-tactical-amber',
       accent: 'text-tactical-amber',
     },
@@ -64,10 +68,12 @@ export default function EvidenceChainBanner({
       step: '03',
       phase: 'MODELED',
       title: 'CMEMS + LAGRANGIAN',
-      highlight: scenarioData?.reconstructed_release ? 'RELEASE LOCUS T-6.5H' : 'DRIFT MODEL',
+      highlight: scenarioData?.reconstructed_release ? 'RELEASE LOCUS T-6.5H' : 'CMEMS HINDCAST',
       detail: scenarioData?.reconstructed_release
         ? `${formatCoordinate(scenarioData.reconstructed_release.lat, scenarioData.reconstructed_release.lon)} · ±3.5 KM`
-        : 'STANDBY',
+        : (scenarioData?.status === 'unreferenced_detection'
+            ? 'Geodetic Metadata Required'
+            : 'Euler-Lagrange Backward Drift'),
       color: 'border-tactical-cyan text-tactical-cyan',
       accent: 'text-tactical-cyan',
     },
@@ -78,10 +84,10 @@ export default function EvidenceChainBanner({
       title: isReal ? 'NOAA AIS ARCHIVE' : 'AIS CORRELATION',
       highlight: topCandidate
         ? `${topCandidate.vessel_name || 'LEAD CANDIDATE'} (${(topCandidate.attribution_score_pct ?? topCandidate.score_index ?? 0).toFixed(1)} / 100)`
-        : (scenarioData ? 'AIS DATA UNAVAILABLE' : 'STANDBY'),
+        : (scenarioData?.status === 'unreferenced_detection' ? 'UNREFERENCED SCENE' : (scenarioData ? 'AIS DATA UNAVAILABLE' : 'AIS CANDIDATE ATTRIBUTION')),
       detail: topCandidate
         ? `${scenarioData?.ais_provenance?.unique_vessels_tracked ? `${scenarioData.ais_provenance.unique_vessels_tracked} Ships · ` : ''}Traj: ${(topCandidate.trajectory_score ?? 0).toFixed(3)}`
-        : 'STANDBY',
+        : (scenarioData?.status === 'unreferenced_detection' ? 'Geodetic Tiepoints Required' : 'Closest Point of Approach (CPA)'),
       color: 'border-tactical-amber text-tactical-amber',
       accent: 'text-tactical-amber',
     },
@@ -90,10 +96,12 @@ export default function EvidenceChainBanner({
       step: '05',
       phase: 'RESPONDER',
       title: 'NGA WPI (PUB 150)',
-      highlight: selectedPort ? selectedPort.port_name.toUpperCase() : (routing ? 'WPI EVALUATED' : 'RESPONSE INFRA'),
+      highlight: selectedPort ? selectedPort.port_name.toUpperCase() : (routing ? 'WPI EVALUATED' : 'NGA WPI LOGISTICS'),
       detail: selectedPort?.geodesic_distance_km != null
         ? `${Number(selectedPort.geodesic_distance_km).toFixed(1)} KM · ${routing?.routing_status || 'GEODESIC FALLBACK'}`
-        : (routing ? (routing.routing_status || 'NOT ESTABLISHED') : 'STANDBY'),
+        : (scenarioData?.status === 'unreferenced_detection'
+            ? 'Geodetic Coordinates Required'
+            : (routing ? (routing.routing_status || 'NOT ESTABLISHED') : 'Response Hub & Port Routing')),
       color: 'border-tactical-cyan text-tactical-cyan',
       accent: 'text-tactical-cyan',
     },
