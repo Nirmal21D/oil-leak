@@ -448,14 +448,25 @@ def get_current_scenario():
         "infrastructure_proximity": None
     }
 
+_preset_cache: Dict[str, Any] = {}
+
 @router.post("/detect/preset/{preset_id}")
 def run_preset_detection(preset_id: str):
     """
     Executes real dual-polarization U-Net segmentation, georeferencing,
     CMEMS drift hindcast, historical AIS query, and NGA WPI port discovery
     for a verified preset SAR scene (e.g. '00111').
+    Results are cached in-memory for instant subsequent C2 response.
     """
     clean_id = preset_id.strip()
+
+    global _active_scenario, _active_detection
+    if clean_id in _preset_cache:
+        cached_res = _preset_cache[clean_id]
+        _active_detection = cached_res
+        if cached_res.get("scenario_update"):
+            _active_scenario = cached_res["scenario_update"]
+        return cached_res
 
     # Priority check: look directly in test dir for clean_id
     scenes = _sar_dataset.list_available_scenes()
@@ -489,6 +500,7 @@ def run_preset_detection(preset_id: str):
         image_path=target.get("image_path")
     )
     result = analyze_dataset_scene(req)
+    _preset_cache[clean_id] = result
     return result
 
 @router.post("/detect", response_model=DetectionSummaryResponse)
@@ -874,6 +886,13 @@ def analyze_dataset_scene(req: AnalyzeSceneRequest):
     overlay_pil.save(buf, format="PNG")
     mask_b64 = f"data:image/png;base64,{base64.b64encode(buf.getvalue()).decode('utf-8')}"
 
+    # Generate raw SAR preview thumbnail
+    sar_thumb = cv2.resize(rgb_composite, (preview_size, preview_size), interpolation=cv2.INTER_LINEAR)
+    sar_pil = Image.fromarray(sar_thumb)
+    buf_sar = io.BytesIO()
+    sar_pil.save(buf_sar, format="PNG")
+    raw_sar_b64 = f"data:image/png;base64,{base64.b64encode(buf_sar.getvalue()).decode('utf-8')}"
+
     # Extract real georeferencing and acquisition timestamp directly from GeoTIFF
     try:
         with tifffile.TiffFile(img_path) as tif_h:
@@ -1001,6 +1020,7 @@ def analyze_dataset_scene(req: AnalyzeSceneRequest):
         "ground_truth_metrics": ground_truth_metrics,
         "morphology": morphology,
         "mask_base64": mask_b64,
+        "raw_sar_base64": raw_sar_b64,
         "scenario_update": scenario_update,
         "scene_georeferenced": geo_info.get("georeferenced", False),
         "scene_crs": geo_info.get("crs"),

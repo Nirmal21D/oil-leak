@@ -247,7 +247,7 @@ class NGAPortIndexService:
         }
     ]
 
-    def __init__(self, timeout_seconds: float = 4.0):
+    def __init__(self, timeout_seconds: float = 1.5):
         self.timeout_seconds = timeout_seconds
         self.GLOBAL_WPI_INDEX = _load_global_wpi_dataset()
 

@@ -108,20 +108,21 @@ class TileSlidingInference:
         probs_accum = np.zeros((num_classes, pH, pW), dtype=np.float32)
         count_accum = np.zeros((1, pH, pW), dtype=np.float32)
         
-        for y in range(0, pH - self.tile_size + 1, self.stride):
-            for x in range(0, pW - self.tile_size + 1, self.stride):
-                crop = padded[y:y+self.tile_size, x:x+self.tile_size]
-                # Convert to FloatTensor (1, 3, 256, 256) normalized [0, 1]
-                tensor_crop = torch.from_numpy(crop).permute(2, 0, 1).unsqueeze(0).float()
-                if tensor_crop.max() > 1.0:
-                    tensor_crop /= 255.0
+        with torch.no_grad():
+            for y in range(0, pH - self.tile_size + 1, self.stride):
+                for x in range(0, pW - self.tile_size + 1, self.stride):
+                    crop = padded[y:y+self.tile_size, x:x+self.tile_size]
+                    # Convert to FloatTensor (1, 3, 256, 256) normalized [0, 1]
+                    tensor_crop = torch.from_numpy(crop).permute(2, 0, 1).unsqueeze(0).float()
+                    if tensor_crop.max() > 1.0:
+                        tensor_crop /= 255.0
+                        
+                    tensor_crop = tensor_crop.to(self.device)
+                    logits = self.model(tensor_crop)
+                    probs = F.softmax(logits, dim=1).squeeze(0).cpu().numpy()
                     
-                tensor_crop = tensor_crop.to(self.device)
-                logits = self.model(tensor_crop)
-                probs = F.softmax(logits, dim=1).squeeze(0).cpu().numpy()
-                
-                probs_accum[:, y:y+self.tile_size, x:x+self.tile_size] += probs
-                count_accum[:, y:y+self.tile_size, x:x+self.tile_size] += 1.0
+                    probs_accum[:, y:y+self.tile_size, x:x+self.tile_size] += probs
+                    count_accum[:, y:y+self.tile_size, x:x+self.tile_size] += 1.0
                 
         probs_avg = probs_accum / np.maximum(count_accum, 1e-6)
         probs_cropped = probs_avg[:, :H, :W]

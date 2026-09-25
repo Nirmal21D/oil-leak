@@ -66,30 +66,7 @@ export default function SARWorkspace({
   };
 
   const handleRunGoldenScene = async () => {
-    setLoading(true);
-    setInputError(null);
-    const formData = new FormData();
-    formData.append('image_path', 'data/02_Test_images_and_ground_truth/Images/Oil/00111.tif');
-
-    try {
-      const res = await fetch(`${API_BASE}/api/v1/detect`, {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!res.ok) {
-        const errJson = await res.json().catch(() => null);
-        throw new Error(errJson?.detail || 'Detection failed on golden test scene 00111.tif');
-      }
-
-      const data = await res.json();
-      if (onDetectionComplete) onDetectionComplete(data);
-    } catch (err: any) {
-      console.error(err);
-      setInputError(err.message || 'Failed to connect to backend engine.');
-    } finally {
-      setLoading(false);
-    }
+    await handleRunPreset('00111');
   };
 
   const handleLoadDemoImage = async () => {
