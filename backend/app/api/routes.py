@@ -468,6 +468,10 @@ def run_preset_detection(preset_id: str):
             _active_scenario = cached_res["scenario_update"]
         return cached_res
 
+    # Map golden/default preset requests directly to Scene 00111 (Copernicus S1 SAR)
+    if clean_id in ["golden", "GOLDEN", "default", "DEFAULT"]:
+        clean_id = "00111"
+
     # Priority check: look directly in test dir for clean_id
     scenes = _sar_dataset.list_available_scenes()
     target = None

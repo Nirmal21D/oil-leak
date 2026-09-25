@@ -79,7 +79,7 @@ export default function DossierModal({
               </span>
             </div>
             <h2 className="text-sm sm:text-base font-black tracking-tight text-concrete-100 font-display uppercase mt-0.5">
-              MARITIME INCIDENT EVIDENCE & INVESTIGATION DOSSIER // {scenarioData?.incident_id || 'AEGIS-2023-GOM-00111'}
+              MARITIME INCIDENT EVIDENCE & INVESTIGATION DOSSIER // {scenarioData?.incident_id || 'INC-20260913-0091'}
             </h2>
           </div>
 
@@ -143,7 +143,7 @@ export default function DossierModal({
                 </h1>
               </div>
               <div className="text-right text-[11px] text-concrete-400 font-mono print:text-black">
-                <div>DOSSIER ID: <strong className="text-concrete-200 print:text-black">{scenarioData?.incident_id || 'AEGIS-2023-GOM-00111'}</strong></div>
+                <div>DOSSIER ID: <strong className="text-concrete-200 print:text-black">{scenarioData?.incident_id || 'INC-20260913-0091'}</strong></div>
                 <div>GENERATED: <strong>{new Date().toISOString()}</strong></div>
               </div>
             </div>

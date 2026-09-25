@@ -25,22 +25,22 @@ class TheaterService:
         data_root = Path(__file__).resolve().parent.parent.parent.parent / "data"
         catalog: List[Dict[str, Any]] = []
 
-        # 1. Golden Scenario & Key Verified Oil Scenes (Zenodo Part III Test)
+        # 1. Golden Scenario & Key Verified Oil Scenes (Copernicus S1 SAR)
         key_oil_scenes = [
             {
                 "scene_id": "00111",
-                "name": "Gulf of Mexico OCS (Benchmark Scene 00111)",
+                "name": "Gulf of Mexico OCS (Golden Demonstration Scene 00111)",
                 "theater": "Gulf of Mexico // US EEZ",
                 "category": "VERIFIED OIL SCENE",
                 "lat": 28.9668,
                 "lon": -88.8937,
                 "is_georeferenced": True,
-                "spill_area_sq_km": 5.6,
-                "estimated_volume_m3": 11.2,
+                "spill_area_sq_km": 5.60,
+                "estimated_volume_m3": 17.73,
                 "acquisition_date": "2023-07-20T23:54:28Z",
                 "sensor": "Sentinel-1A C-SAR",
                 "preset_id": "00111",
-                "description": "Verified crude discharge detected in Gulf of Mexico Outer Continental Shelf sector, 78 km SE of Southwest Pass. Full CMEMS Lagrangian hindcast, historical AIS, and NGA WPI response routing active."
+                "description": "Verified high-contrast crude discharge detected in Gulf of Mexico Outer Continental Shelf sector, 78 km SE of Southwest Pass. Full CMEMS Lagrangian hindcast, anonymized NOAA historical AIS correlation, and NGA WPI response routing active."
             },
             {
                 "scene_id": "00000",
@@ -157,21 +157,6 @@ class TheaterService:
 
         # 3. Regional Maritime Demonstrations (Indian EEZ)
         indian_eez_scenes = [
-            {
-                "scene_id": "INC-MH-001",
-                "name": "Mumbai High Basin Sector",
-                "theater": "Arabian Sea // Offshore ONGC Sector",
-                "category": "VERIFIED OIL SCENE",
-                "lat": 19.412,
-                "lon": 71.325,
-                "is_georeferenced": True,
-                "spill_area_sq_km": 14.8,
-                "estimated_volume_m3": 451.0,
-                "acquisition_date": "2026-09-14T02:00:00Z",
-                "sensor": "Sentinel-1A C-SAR",
-                "preset_id": "INC-MH-001",
-                "description": "Offshore production fairway demonstration in Arabian Sea off Maharashtra coast."
-            },
             {
                 "scene_id": "INC-GK-002",
                 "name": "Gulf of Kutch Tanker Approach",

@@ -57,7 +57,7 @@
 5. [Deep Learning Pipeline & Benchmark Performance](#5-deep-learning-pipeline--benchmark-performance)
 6. [Hydrodynamic Hindcasting & Lagrangian Drift Solver](#6-hydrodynamic-hindcasting--lagrangian-drift-solver)
 7. [Multi-Signal AIS Correlation & Attribution Index](#7-multi-signal-ais-correlation--attribution-index)
-8. [Locked Operational Demonstration Scenario (Mumbai High Basin)](#8-locked-operational-demonstration-scenario-mumbai-high-basin)
+8. [Verified Copernicus Satellite Demonstration Scenario (Scene 00111 - Gulf of Mexico OCS)](#8-verified-copernicus-satellite-demonstration-scenario-scene-00111---gulf-of-mexico-ocs)
 9. [Dark Vessel & Non-Cooperative Target Detection (CFAR)](#9-dark-vessel--non-cooperative-target-detection-cfar)
 10. [Response Infrastructure & NGA World Port Index (Pub 150)](#10-response-infrastructure--nga-world-port-index-pub-150)
 11. [Evidence Integrity & Printable C2 Investigation Dossier](#11-evidence-integrity--printable-c2-investigation-dossier)
@@ -369,51 +369,51 @@ To uphold international maritime jurisprudence and prevent defamatory automated 
 
 ---
 
-## 8. Locked Operational Demonstration Scenario (Mumbai High Basin)
+## 8. Verified Copernicus Satellite Demonstration Scenario (Scene 00111 - Gulf of Mexico OCS)
 
-AegisSea incorporates a fully locked, end-to-end operational demonstration scenario situated in the **Mumbai High Offshore Oil Field Sector (`19.4120° N, 71.3250° E`)** within the Indian Exclusive Economic Zone (EEZ)—directly aligning with the national maritime surveillance mandate of the National Technical Research Organisation (NTRO).
+AegisSea provides an end-to-end operational verification scenario executing on **real Copernicus Sentinel-1 dual-polarization SAR imagery (`00111.tif`)** situated in the **Gulf of Mexico Outer Continental Shelf (`28.9668° N, 88.8937° W`)**, 78 km southeast of Southwest Pass. This scenario exercises the complete automated forensics pipeline: from raw 2048 x 2048 GeoTIFF tile sliding-window neural segmentation to 2D Lagrangian backward drift hindcasting, historical AIS spatio-temporal trajectory reconstruction, and NGA World Port Index (Pub 150) infrastructure routing.
 
-### Synthetic AIS Governance & Identification Standard
-To ensure absolute legal and forensic integrity, AegisSea **strictly enforces synthetic vessel identifiers (`SYN-AIS-XXXX`, `SYN-MMSI-XXXXX`)** for demonstration traffic. No real commercial vessels or active Maritime Mobile Service Identities are ever named as discharge suspects in unadjudicated test scenarios, eliminating legal liability and preserving the strict presumption of innocence.
+### Forensic Anonymization Standard
+To eliminate any possibility of commercial defamation or legal liability against active maritime vessels, AegisSea **strictly enforces synthetic identification tokens (`SYN-VESSEL-XX`, MMSI: `9990000XX`, IMO: `IMO99900XX`)** across all ingested historical AIS benchmark archives. The kinematic trajectories, speeds, timestamps, and courses are preserved from NOAA MarineCadastre archives, but all real-world vessel names and validly-formatted MMSIs are replaced with synthetic tokens, upholding the strict presumption of innocence.
 
 ```
-                         MUMBAI HIGH OPERATIONAL SCENARIO METRICS
+                      COPERNICUS SCENE 00111 OPERATIONAL BENCHMARK METRICS
 ┌──────────────────────────────┬──────────────────────────────────────────────────────────────────┐
-│ Scenario Identifier          │ INC-20260913-0091                                                │
+│ Scenario Identifier          │ AEGIS-2023-GOM-00111 (INC-ZENODO-OIL-00111)                      │
 ├──────────────────────────────┼──────────────────────────────────────────────────────────────────┤
-│ Geographic Sector            │ Mumbai High Offshore Basin, Arabian Sea (Indian EEZ)             │
+│ Geographic Sector            │ Gulf of Mexico Outer Continental Shelf (78 km SE Southwest Pass) │
 ├──────────────────────────────┼──────────────────────────────────────────────────────────────────┤
-│ Observed Slick Centroid      │ 19.4120° N, 71.3250° E                                           │
+│ Satellite Sensor             │ Copernicus Sentinel-1A C-band SAR (IW Swath, Dual-Pol VV/VH)     │
 ├──────────────────────────────┼──────────────────────────────────────────────────────────────────┤
-│ Observed Surface Area        │ 14.80 km² (Perimeter: 28.4 km, Compactness: 0.23)                │
+│ Raw Raster Dimensions        │ 2048 x 2048 GeoTIFF (4,194,304 pixels, 10.0m spatial resolution) │
 ├──────────────────────────────┼──────────────────────────────────────────────────────────────────┤
-│ Estimated Oil Volume & Mass  │ 31.82 m³ / 27.68 metric tons (Fay Spreading: Gravity-Viscous)    │
+│ Observed Slick Centroid      │ 28.9668° N, 88.8937° W                                           │
 ├──────────────────────────────┼──────────────────────────────────────────────────────────────────┤
-│ Reconstructed Release Locus  │ 19.4733° N, 71.2097° E (T - 6.5 hours / Backwards Advection)     │
+│ Neural Pixel Detections      │ 63,963 oil pixels (1.525% scene surface area)                    │
 ├──────────────────────────────┼──────────────────────────────────────────────────────────────────┤
-│ Environmental Telemetry      │ Wind: 14.0 kts @ 065° NE | Current: 1.2 kts | Sea Temp: 28.4°C    │
+│ Observed Surface Area        │ 5.60 km² (Perimeter: 177.2 km, Compactness: 0.0026)              │
 ├──────────────────────────────┼──────────────────────────────────────────────────────────────────┤
-│ Primary Attribution Lead     │ MT Ocean Pioneer (ID: SYN-AIS-9482, MMSI: SYN-MMSI-41901)        │
+│ Estimated Oil Volume & Mass  │ 17.73 m³ / 15.43 metric tons (Fay Spreading: Gravity-Viscous)    │
 ├──────────────────────────────┼──────────────────────────────────────────────────────────────────┤
-│ Vessel Classification        │ Crude Oil Tanker (Flag: Panama, Speed: 12.4 knots)               │
+│ Reconstructed Release Locus  │ 29.0007° N, 88.9735° W (T - 6.5 hours / Backwards Advection)     │
 ├──────────────────────────────┼──────────────────────────────────────────────────────────────────┤
-│ Closest Point of Approach    │ CPA: 1.8 km at T - 6.0 hours (Spatial Proximity Score: 0.937)    │
+│ Environmental Telemetry      │ Drift Vector: 123.7° T at 0.56 knots                             │
 ├──────────────────────────────┼──────────────────────────────────────────────────────────────────┤
-│ Trajectory Alignment Score   │ S_traj: 0.999 (Vessel heading 126.5° closely aligned with drift) │
+│ Historical AIS Archive       │ NOAA / BOEM MarineCadastre AccessAIS (00111_gom_historical_ais)  │
 ├──────────────────────────────┼──────────────────────────────────────────────────────────────────┤
-│ AegisSea Attribution Index   │ 96.4 / 100 (Operational Tier: HIGH PRIORITY CANDIDATE)           │
+│ AIS Query Window (UTC)       │ 2018-04-22T17:31:49Z to 2018-04-23T00:11:49Z (6.67h Window)      │
 ├──────────────────────────────┼──────────────────────────────────────────────────────────────────┤
-│ Secondary Candidate          │ MV Arabian Trader (ID: SYN-AIS-7104, MMSI: SYN-MMSI-41902)       │
+│ Pings & Vessels Evaluated    │ 6,290 raw pings across 63 unique vessels (100% Anonymized)       │
 ├──────────────────────────────┼──────────────────────────────────────────────────────────────────┤
-│ Secondary Attribution Index  │ 39.7 / 100 (Operational Tier: LOW CORRELATION CANDIDATE)         │
+│ Primary Attribution Lead     │ SYN-VESSEL-63 (MMSI: 999000063, Tug / Towing Vessel)             │
 ├──────────────────────────────┼──────────────────────────────────────────────────────────────────┤
-│ Non-Cooperative Contact      │ DARK-TARGET-04 (CFAR Radar RCS: 18.5 dB, No AIS, CPA: 2.1 km)    │
+│ Secondary Candidate Leads    │ SYN-VESSEL-35 (MMSI: 999000035), SYN-VESSEL-21 (MMSI: 999000021) │
 ├──────────────────────────────┼──────────────────────────────────────────────────────────────────┤
-│ Nearest Offshore Asset       │ Mumbai High Field Centroid Complex (1.03 km distance)            │
+│ Nearest Port Infrastructure  │ Port Sulphur, Louisiana (NGA WPI #8830, Distance: 95.8 km)       │
 ├──────────────────────────────┼──────────────────────────────────────────────────────────────────┤
-│ Coast Guard Response Base    │ Indian Coast Guard District HQ 2 (Mumbai Port Station Base)      │
+│ Secondary Response Ports     │ Venice (WPI #8825, 104.2 km), Southwest Pass (WPI #8822, 185 km) │
 ├──────────────────────────────┼──────────────────────────────────────────────────────────────────┤
-│ Responder Intercept Vector   │ 164.2 km (88.7 NM) | Heading: 260.4° T | Formatted ETA: ~4.0h    │
+│ Responder Routing Status     │ GEODESIC_FALLBACK (Straight-line geodesic vector, ETA ~2.3h)     │
 └──────────────────────────────┴──────────────────────────────────────────────────────────────────┘
 ```
 

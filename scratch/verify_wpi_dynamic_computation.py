@@ -13,8 +13,8 @@ def test_wpi_computation():
     routing_service = CoastGuardResponderRouting()
     
     print("=================================================================")
-    print("TEST 1: Golden Incident Coordinates (MC20 Default Locus)")
-    print("Coords: 28.9668° N, 88.8937° W (Mississippi Canyon Sector)")
+    print("TEST 1: Golden Incident Coordinates (GOM Default Locus)")
+    print("Coords: 28.9668° N, 88.8937° W (Gulf of Mexico OCS Sector)")
     print("=================================================================")
     
     res1 = nga_service.discover_candidate_ports(28.9668, -88.8937, max_radius_km=350.0)

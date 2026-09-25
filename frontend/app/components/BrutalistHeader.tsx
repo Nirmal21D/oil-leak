@@ -109,7 +109,7 @@ export default function BrutalistHeader({
               disabled={isProcessing}
               className="brutalist-btn-orange px-2.5 py-1 text-[11px] font-black uppercase tracking-wider flex items-center space-x-1 cursor-pointer disabled:opacity-50"
             >
-              <span>{isProcessing ? '⚡ PROCESSING...' : '⚡ RUN GOLDEN: 00111 (NOAA AIS)'}</span>
+              <span>{isProcessing ? '⚡ PROCESSING...' : '⚡ RUN GOLDEN: SCENE 00111 (REAL SAR)'}</span>
             </button>
           )}
 

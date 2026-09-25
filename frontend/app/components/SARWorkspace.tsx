@@ -178,7 +178,7 @@ export default function SARWorkspace({
                 disabled={loading}
                 className="brutalist-btn-orange py-1.5 px-2 font-bold uppercase flex items-center justify-center space-x-1 cursor-pointer disabled:opacity-50"
               >
-                <span>⚡ 00111 (GULF OF MEXICO)</span>
+                <span>⚡ 00111 (GOLDEN SAR SCENE)</span>
               </button>
 
               <button
@@ -202,9 +202,12 @@ export default function SARWorkspace({
                 disabled={loading}
                 className="brutalist-btn bg-concrete-850 hover:bg-concrete-750 text-concrete-300 py-1.5 px-2 font-bold uppercase flex items-center justify-center space-x-1 cursor-pointer disabled:opacity-50 border border-concrete-700"
               >
-                <span>⚡ DEMO (SYNTHETIC)</span>
+                <span>⚡ DEMO (SYNTHETIC CROP)</span>
               </button>
             </div>
+            <p className="text-[9px] text-concrete-500 font-mono">
+              ⚡ Verified Operational Scene: Copernicus Sentinel-1 dual-pol GeoTIFF 00111 (Gulf of Mexico OCS). 100% anonymized AIS.
+            </p>
           </div>
 
           {/* Input Error Alert */}

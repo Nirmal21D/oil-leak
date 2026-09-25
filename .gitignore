@@ -5,6 +5,8 @@
 
 # Large Data & Datasets
 data/
+!data/historical_ais/
+!data/historical_ais/00111_gom_historical_ais.csv
 backend/app/models/weights/*.pth
 backend/app/models/weights/*.pt
 *.7z
