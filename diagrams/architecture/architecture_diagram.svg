@@ -1,0 +1,340 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" style="background:#ffffff; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+<defs>
+      <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#475569" />
+      </marker>
+      <marker id="arrow-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#2563EB" />
+      </marker>
+      <marker id="arrow-emerald" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#059669" />
+      </marker>
+      <marker id="arrow-amber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#D97706" />
+      </marker>
+      <filter id="card-shadow" x="-4%" y="-4%" width="108%" height="108%" filterUnits="userSpaceOnUse">
+        <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#0F172A" flood-opacity="0.06" />
+      </filter>
+      <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+        <circle cx="2" cy="2" r="1" fill="#E2E8F0" />
+      </pattern>
+    </defs>
+<rect width="1600" height="900" fill="#FAFAFA" />
+<rect width="1600" height="900" fill="url(#grid)" opacity="0.6" />
+<g id="header">
+      <rect x="40" y="24" width="1520" height="56" rx="8" fill="#0F172A" />
+      <text x="64" y="58" font-size="18" font-weight="800" fill="#FFFFFF" letter-spacing="1">AEGISSEA // END-TO-END SYSTEM &amp; FORENSIC ARCHITECTURE</text>
+      <text x="1160" y="58" font-size="13" font-weight="600" fill="#94A3B8" letter-spacing="0.5">SMART INDIA HACKATHON 2026 • TEAM DEVALLY</text>
+    </g>
+<g id="lane-40">
+          <rect x="40" y="95" width="260" height="680" rx="8" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1.5" />
+          <rect x="40" y="95" width="260" height="42" rx="8" fill="#F1F5F9" stroke="#CBD5E1" stroke-width="1.5" />
+          <text x="56" y="121" font-size="13" font-weight="800" fill="#1E293B">1. INGESTION &amp; SENSORS</text>
+          <text x="56" y="133" font-size="9" font-weight="500" fill="#64748B">Earth Observation &amp; Metocean Feeds</text>
+        </g>
+<g id="lane-320">
+          <rect x="320" y="95" width="380" height="680" rx="8" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1.5" />
+          <rect x="320" y="95" width="380" height="42" rx="8" fill="#F1F5F9" stroke="#CBD5E1" stroke-width="1.5" />
+          <text x="336" y="121" font-size="13" font-weight="800" fill="#1E293B">2. AI &amp; PHYSICS ENGINES</text>
+          <text x="336" y="133" font-size="9" font-weight="500" fill="#64748B">ResNet-34 U-Net &amp; Lagrangian Modeling</text>
+        </g>
+<g id="lane-720">
+          <rect x="720" y="95" width="260" height="680" rx="8" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1.5" />
+          <rect x="720" y="95" width="260" height="42" rx="8" fill="#F1F5F9" stroke="#CBD5E1" stroke-width="1.5" />
+          <text x="736" y="121" font-size="13" font-weight="800" fill="#1E293B">3. DATA &amp; STORAGE</text>
+          <text x="736" y="133" font-size="9" font-weight="500" fill="#64748B">Geospatial Feature &amp; Scenario Store</text>
+        </g>
+<g id="lane-1000">
+          <rect x="1000" y="95" width="260" height="680" rx="8" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1.5" />
+          <rect x="1000" y="95" width="260" height="42" rx="8" fill="#F1F5F9" stroke="#CBD5E1" stroke-width="1.5" />
+          <text x="1016" y="121" font-size="13" font-weight="800" fill="#1E293B">4. API &amp; GATEWAY</text>
+          <text x="1016" y="133" font-size="9" font-weight="500" fill="#64748B">FastAPI Async Microservices</text>
+        </g>
+<g id="lane-1280">
+          <rect x="1280" y="95" width="280" height="680" rx="8" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1.5" />
+          <rect x="1280" y="95" width="280" height="42" rx="8" fill="#F1F5F9" stroke="#CBD5E1" stroke-width="1.5" />
+          <text x="1296" y="121" font-size="13" font-weight="800" fill="#1E293B">5. TACTICAL C2 &amp; DISPATCH</text>
+          <text x="1296" y="133" font-size="9" font-weight="500" fill="#64748B">Command Dashboard &amp; Legal Dossier</text>
+        </g>
+<g filter="url(#card-shadow)">
+          <rect x="52" y="150" width="236" height="72" rx="6" fill="#F0F9FF" stroke="#0284C7" stroke-width="1.5" />
+          <rect x="52" y="150" width="6" height="72" rx="2" fill="#0284C7" />
+          <text x="68" y="172" font-size="12" font-weight="700" fill="#0F172A">Sentinel-1 SAR C-Band</text>
+          <text x="68" y="188" font-size="10" font-weight="500" fill="#64748B">ESA Copernicus IW GRD • 10m GSD</text>
+          <rect x="210" y="160" width="70" height="16" rx="4" fill="#0284C7" opacity="0.15" />
+          <text x="245" y="172" font-size="8" font-weight="800" fill="#0284C7" text-anchor="middle">RADAR</text>
+        </g>
+<g filter="url(#card-shadow)">
+          <rect x="52" y="234" width="236" height="72" rx="6" fill="#F0FDFA" stroke="#0D9488" stroke-width="1.5" />
+          <rect x="52" y="234" width="6" height="72" rx="2" fill="#0D9488" />
+          <text x="68" y="256" font-size="12" font-weight="700" fill="#0F172A">CMEMS Ocean Physics</text>
+          <text x="68" y="272" font-size="10" font-weight="500" fill="#64748B">Copernicus Surface Currents (u/v)</text>
+          <rect x="210" y="244" width="70" height="16" rx="4" fill="#0D9488" opacity="0.15" />
+          <text x="245" y="256" font-size="8" font-weight="800" fill="#0D9488" text-anchor="middle">METOCEAN</text>
+        </g>
+<g filter="url(#card-shadow)">
+          <rect x="52" y="318" width="236" height="72" rx="6" fill="#EFF6FF" stroke="#2563EB" stroke-width="1.5" />
+          <rect x="52" y="318" width="6" height="72" rx="2" fill="#2563EB" />
+          <text x="68" y="340" font-size="12" font-weight="700" fill="#0F172A">NOAA GFS Wind Fields</text>
+          <text x="68" y="356" font-size="10" font-weight="500" fill="#64748B">Global 10m Surface Wind Vectors</text>
+          <rect x="210" y="328" width="70" height="16" rx="4" fill="#2563EB" opacity="0.15" />
+          <text x="245" y="340" font-size="8" font-weight="800" fill="#2563EB" text-anchor="middle">ATMOSPHERIC</text>
+        </g>
+<g filter="url(#card-shadow)">
+          <rect x="52" y="402" width="236" height="72" rx="6" fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.5" />
+          <rect x="52" y="402" width="6" height="72" rx="2" fill="#7C3AED" />
+          <text x="68" y="424" font-size="12" font-weight="700" fill="#0F172A">NOAA MarineCadastre</text>
+          <text x="68" y="440" font-size="10" font-weight="500" fill="#64748B">Coastal &amp; Satellite AIS Kinematics</text>
+          <rect x="210" y="412" width="70" height="16" rx="4" fill="#7C3AED" opacity="0.15" />
+          <text x="245" y="424" font-size="8" font-weight="800" fill="#7C3AED" text-anchor="middle">VESSEL AIS</text>
+        </g>
+<g filter="url(#card-shadow)">
+          <rect x="52" y="486" width="236" height="72" rx="6" fill="#FFFBEB" stroke="#D97706" stroke-width="1.5" />
+          <rect x="52" y="486" width="6" height="72" rx="2" fill="#D97706" />
+          <text x="68" y="508" font-size="12" font-weight="700" fill="#0F172A">NGA World Port Index</text>
+          <text x="68" y="524" font-size="10" font-weight="500" fill="#64748B">Global Port &amp; Berthing Geodatabase</text>
+          <rect x="210" y="496" width="70" height="16" rx="4" fill="#D97706" opacity="0.15" />
+          <text x="245" y="508" font-size="8" font-weight="800" fill="#D97706" text-anchor="middle">MARITIME GIS</text>
+        </g>
+<g filter="url(#card-shadow)">
+          <rect x="52" y="574" width="236" height="180" rx="6" fill="#FFFFFF" stroke="#475569" stroke-width="1.5" />
+          <rect x="52" y="574" width="6" height="180" rx="2" fill="#475569" />
+          <text x="68" y="596" font-size="12" font-weight="700" fill="#0F172A">Geodetic Preprocessing Tiler</text>
+          <text x="68" y="612" font-size="10" font-weight="500" fill="#64748B">GDAL • Rasterio • WGS-84 Tag Parser</text>
+          <rect x="210" y="584" width="70" height="16" rx="4" fill="#475569" opacity="0.15" />
+          <text x="245" y="596" font-size="8" font-weight="800" fill="#475569" text-anchor="middle">PREPROCESSING</text>
+        </g>
+<text x="68" y="639" font-size="9.5" font-weight="500" fill="#334155">• GeoTIFF ModelTiepoints &amp; Scale Extraction</text>
+<text x="68" y="661" font-size="9.5" font-weight="500" fill="#334155">• Sliding-Window 512×512 Tile Extractor</text>
+<text x="68" y="683" font-size="9.5" font-weight="500" fill="#334155">• Dynamic Min-Max Normalization</text>
+<text x="68" y="705" font-size="9.5" font-weight="500" fill="#334155">• Spatial Bounding Box Filter</text>
+<g filter="url(#card-shadow)">
+          <rect x="332" y="150" width="356" height="150" rx="6" fill="#FFFFFF" stroke="#DC2626" stroke-width="1.5" />
+          <rect x="332" y="150" width="6" height="150" rx="2" fill="#DC2626" />
+          <text x="350" y="174" font-size="13" font-weight="800" fill="#0F172A">AI Segmentation Engine</text>
+          <text x="350" y="190" font-size="10" font-weight="600" fill="#64748B">PyTorch • NVIDIA CUDA FP16 Acceleration</text>
+          <rect x="580" y="160" width="96" height="20" rx="4" fill="#DC2626" opacity="0.12" />
+          <text x="628" y="174" font-size="9" font-weight="800" fill="#DC2626" text-anchor="middle">ResNet-34 U-Net</text>
+        </g>
+<text x="350" y="214" font-size="10" font-weight="500" fill="#334155">• 3-Class Semantic Segmentation (Oil / Lookalike / Sea)</text>
+<text x="350" y="234" font-size="10" font-weight="500" fill="#334155">• Zenodo Benchmark: 0.826 IoU • 0.892 F1-Score</text>
+<text x="350" y="254" font-size="10" font-weight="500" fill="#334155">• OpenCV Morphological Slick Contour Vectorization</text>
+<text x="350" y="274" font-size="10" font-weight="500" fill="#334155">• Metric Surface Area (km²) &amp; Centroid Derivation</text>
+<g filter="url(#card-shadow)">
+          <rect x="332" y="312" width="356" height="140" rx="6" fill="#FFFFFF" stroke="#0284C7" stroke-width="1.5" />
+          <rect x="332" y="312" width="6" height="140" rx="2" fill="#0284C7" />
+          <text x="350" y="336" font-size="13" font-weight="800" fill="#0F172A">Lagrangian Ocean Drift Engine</text>
+          <text x="350" y="352" font-size="10" font-weight="600" fill="#64748B">Numerical Hydrodynamic Trajectory Modeling</text>
+          <rect x="580" y="322" width="96" height="20" rx="4" fill="#0284C7" opacity="0.12" />
+          <text x="628" y="336" font-size="9" font-weight="800" fill="#0284C7" text-anchor="middle">RK4 Solver</text>
+        </g>
+<text x="350" y="376" font-size="10" font-weight="500" fill="#334155">• 4th-Order Runge-Kutta Numerical Integration</text>
+<text x="350" y="396" font-size="10" font-weight="500" fill="#334155">• CMEMS Currents (u/v) + 3% NOAA Windage Drift</text>
+<text x="350" y="416" font-size="10" font-weight="500" fill="#334155">• Reverse Hindcasting to Spill Locus (T - 6.5h Origin)</text>
+<text x="350" y="436" font-size="10" font-weight="500" fill="#334155">• Forward Dispersion Plume &amp; Uncertainty Envelope</text>
+<g filter="url(#card-shadow)">
+          <rect x="332" y="464" width="356" height="136" rx="6" fill="#FFFFFF" stroke="#059669" stroke-width="1.5" />
+          <rect x="332" y="464" width="6" height="136" rx="2" fill="#059669" />
+          <text x="350" y="488" font-size="13" font-weight="800" fill="#0F172A">Spatio-Temporal AIS Attribution</text>
+          <text x="350" y="504" font-size="10" font-weight="600" fill="#64748B">Vessel Track Intersection &amp; Anomaly Scorer</text>
+          <rect x="580" y="474" width="96" height="20" rx="4" fill="#059669" opacity="0.12" />
+          <text x="628" y="488" font-size="9" font-weight="800" fill="#059669" text-anchor="middle">Kinematic Match</text>
+        </g>
+<text x="350" y="528" font-size="10" font-weight="500" fill="#334155">• Closest Point of Approach (CPA) Calculation</text>
+<text x="350" y="548" font-size="10" font-weight="500" fill="#334155">• Temporal Concurrence (Historical Query Window)</text>
+<text x="350" y="568" font-size="10" font-weight="500" fill="#334155">• Speed &amp; Heading Anomaly Quantification</text>
+<text x="350" y="588" font-size="10" font-weight="500" fill="#334155">• Plain-English 'Why Flagged' Defensible Verdict</text>
+<g filter="url(#card-shadow)">
+          <rect x="332" y="612" width="356" height="142" rx="6" fill="#FFFFFF" stroke="#7C3AED" stroke-width="1.5" />
+          <rect x="332" y="612" width="6" height="142" rx="2" fill="#7C3AED" />
+          <text x="350" y="636" font-size="13" font-weight="800" fill="#0F172A">Dark Target Correlator</text>
+          <text x="350" y="652" font-size="10" font-weight="600" fill="#64748B">Non-Cooperative Vessel Detection</text>
+          <rect x="580" y="622" width="96" height="20" rx="4" fill="#7C3AED" opacity="0.12" />
+          <text x="628" y="636" font-size="9" font-weight="800" fill="#7C3AED" text-anchor="middle">Security Module</text>
+        </g>
+<text x="350" y="676" font-size="10" font-weight="500" fill="#334155">• SAR High-Backscatter Ship Signature Extraction</text>
+<text x="350" y="696" font-size="10" font-weight="500" fill="#334155">• Cross-Matching with Active AIS Transponders</text>
+<text x="350" y="716" font-size="10" font-weight="500" fill="#334155">• Flags Dark Vessels Operating with AIS Off</text>
+<text x="350" y="736" font-size="10" font-weight="500" fill="#334155">• Unregistered Discharge Source Attribution</text>
+<g filter="url(#card-shadow)">
+          <rect x="732" y="150" width="236" height="180" rx="6" fill="#FFFFFF" stroke="#0D9488" stroke-width="1.5" />
+          <rect x="732" y="150" width="6" height="180" rx="2" fill="#0D9488" />
+          <text x="748" y="174" font-size="12" font-weight="800" fill="#0F172A">GeoJSON &amp; Spatial Store</text>
+          <text x="748" y="190" font-size="9.5" font-weight="600" fill="#64748B">Vector Geometry Feature Layer</text>
+          <rect x="888" y="160" width="70" height="18" rx="4" fill="#0D9488" opacity="0.12" />
+          <text x="923" y="173" font-size="8.5" font-weight="800" fill="#0D9488" text-anchor="middle">PostGIS</text>
+        </g>
+<text x="748" y="214" font-size="9" font-weight="500" fill="#334155">• Slick Polygon Contours (MultiPolygon)</text>
+<text x="748" y="234" font-size="9" font-weight="500" fill="#334155">• Lagrangian Drift Trajectory Lines</text>
+<text x="748" y="254" font-size="9" font-weight="500" fill="#334155">• Forward Dispersion Plume Polygons</text>
+<text x="748" y="274" font-size="9" font-weight="500" fill="#334155">• Historical AIS Vessel Breadcrumbs</text>
+<text x="748" y="294" font-size="9" font-weight="500" fill="#334155">• NGA Port Locations &amp; Facilities</text>
+<text x="748" y="314" font-size="9" font-weight="500" fill="#334155">• WGS-84 (EPSG:4326) CRS Standard</text>
+<g filter="url(#card-shadow)">
+          <rect x="732" y="350" width="236" height="190" rx="6" fill="#FFFFFF" stroke="#D97706" stroke-width="1.5" />
+          <rect x="732" y="350" width="6" height="190" rx="2" fill="#D97706" />
+          <text x="748" y="374" font-size="12" font-weight="800" fill="#0F172A">In-Memory Scenario State</text>
+          <text x="748" y="390" font-size="9.5" font-weight="600" fill="#64748B">Active Incident Intelligence Context</text>
+          <rect x="888" y="360" width="70" height="18" rx="4" fill="#D97706" opacity="0.12" />
+          <text x="923" y="373" font-size="8.5" font-weight="800" fill="#D97706" text-anchor="middle">Fast Cache</text>
+        </g>
+<text x="748" y="414" font-size="9" font-weight="500" fill="#334155">• Active Incident ID &amp; Telemetry</text>
+<text x="748" y="434" font-size="9" font-weight="500" fill="#334155">• Current Locus Coordinates (Lat / Lon)</text>
+<text x="748" y="454" font-size="9" font-weight="500" fill="#334155">• Ground Truth Benchmark Comparison</text>
+<text x="748" y="474" font-size="9" font-weight="500" fill="#334155">• Ranked Suspect Candidates &amp; Scores</text>
+<text x="748" y="494" font-size="9" font-weight="500" fill="#334155">• Response Routing Vector Parameters</text>
+<text x="748" y="514" font-size="9" font-weight="500" fill="#334155">• Fast Hot-Reload &amp; Replay State</text>
+<g filter="url(#card-shadow)">
+          <rect x="732" y="560" width="236" height="194" rx="6" fill="#FFFFFF" stroke="#64748B" stroke-width="1.5" />
+          <rect x="732" y="560" width="6" height="194" rx="2" fill="#64748B" />
+          <text x="748" y="584" font-size="12" font-weight="800" fill="#0F172A">Model &amp; Asset Registry</text>
+          <text x="748" y="600" font-size="9.5" font-weight="600" fill="#64748B">Trained Weights &amp; Static Data</text>
+          <rect x="888" y="570" width="70" height="18" rx="4" fill="#64748B" opacity="0.12" />
+          <text x="923" y="583" font-size="8.5" font-weight="800" fill="#64748B" text-anchor="middle">Baselines</text>
+        </g>
+<text x="748" y="624" font-size="9" font-weight="500" fill="#334155">• ResNet-34 U-Net Checkpoints (PyTorch)</text>
+<text x="748" y="644" font-size="9" font-weight="500" fill="#334155">• 30+ Held-Out Zenodo Test Rasters</text>
+<text x="748" y="664" font-size="9" font-weight="500" fill="#334155">• Oil Spill Ground Truth Binary Masks</text>
+<text x="748" y="684" font-size="9" font-weight="500" fill="#334155">• NGA World Port Index Shapefiles</text>
+<text x="748" y="704" font-size="9" font-weight="500" fill="#334155">• Pre-calculated Metocean Climatology</text>
+<text x="748" y="724" font-size="9" font-weight="500" fill="#334155">• Sub-Second Cold Start Cache</text>
+<g filter="url(#card-shadow)">
+          <rect x="1012" y="150" width="236" height="220" rx="6" fill="#FFFFFF" stroke="#059669" stroke-width="1.5" />
+          <rect x="1012" y="150" width="6" height="220" rx="2" fill="#059669" />
+          <text x="1028" y="174" font-size="12" font-weight="800" fill="#0F172A">FastAPI Async Gateway</text>
+          <text x="1028" y="190" font-size="9.5" font-weight="600" fill="#64748B">High-Throughput REST Microservices</text>
+          <rect x="1168" y="160" width="70" height="18" rx="4" fill="#059669" opacity="0.12" />
+          <text x="1203" y="173" font-size="8.5" font-weight="800" fill="#059669" text-anchor="middle">Python 3.10</text>
+        </g>
+<text x="1028" y="214" font-size="9" font-weight="500" fill="#334155">• POST /detect: U-Net SAR Mask Inference</text>
+<text x="1028" y="234" font-size="9" font-weight="500" fill="#334155">• GET /scenario/current: Active Intelligence</text>
+<text x="1028" y="254" font-size="9" font-weight="500" fill="#334155">• POST /drift: RK4 Simulation</text>
+<text x="1028" y="274" font-size="9" font-weight="500" fill="#334155">• POST /attribution: AIS Kinematic Match</text>
+<text x="1028" y="294" font-size="9" font-weight="500" fill="#334155">• GET /dataset/scenes: Real Scene Catalog</text>
+<text x="1028" y="314" font-size="9" font-weight="500" fill="#334155">• Async Non-Blocking Task Worker Engine</text>
+<text x="1028" y="334" font-size="9" font-weight="500" fill="#334155">• CORS Middleware &amp; Rate Limiting</text>
+<g filter="url(#card-shadow)">
+          <rect x="1012" y="390" width="236" height="170" rx="6" fill="#FFFFFF" stroke="#0284C7" stroke-width="1.5" />
+          <rect x="1012" y="390" width="6" height="170" rx="2" fill="#0284C7" />
+          <text x="1028" y="414" font-size="12" font-weight="800" fill="#0F172A">Pydantic v2 Serialization</text>
+          <text x="1028" y="430" font-size="9.5" font-weight="600" fill="#64748B">Type-Safe Data Contracts</text>
+          <rect x="1168" y="400" width="70" height="18" rx="4" fill="#0284C7" opacity="0.12" />
+          <text x="1203" y="413" font-size="8.5" font-weight="800" fill="#0284C7" text-anchor="middle">Validation</text>
+        </g>
+<text x="1028" y="454" font-size="9" font-weight="500" fill="#334155">• Incident Scenario Update Payloads</text>
+<text x="1028" y="474" font-size="9" font-weight="500" fill="#334155">• Metocean Telemetry Validation</text>
+<text x="1028" y="494" font-size="9" font-weight="500" fill="#334155">• MultiPolygon GeoJSON RFC Validation</text>
+<text x="1028" y="514" font-size="9" font-weight="500" fill="#334155">• Safe Base64 Data URL Sanitizer</text>
+<text x="1028" y="534" font-size="9" font-weight="500" fill="#334155">• Robust HTTP Error Handlers</text>
+<g filter="url(#card-shadow)">
+          <rect x="1012" y="580" width="236" height="174" rx="6" fill="#FFFFFF" stroke="#2563EB" stroke-width="1.5" />
+          <rect x="1012" y="580" width="6" height="174" rx="2" fill="#2563EB" />
+          <text x="1028" y="604" font-size="12" font-weight="800" fill="#0F172A">Dispatcher &amp; Route Solver</text>
+          <text x="1028" y="620" font-size="9.5" font-weight="600" fill="#64748B">Operational Mitigation Routing</text>
+          <rect x="1168" y="590" width="70" height="18" rx="4" fill="#2563EB" opacity="0.12" />
+          <text x="1203" y="603" font-size="8.5" font-weight="800" fill="#2563EB" text-anchor="middle">Router</text>
+        </g>
+<text x="1028" y="644" font-size="9" font-weight="500" fill="#334155">• Nearest Response Port Identification</text>
+<text x="1028" y="664" font-size="9" font-weight="500" fill="#334155">• Geodesic Intercept Distance Calculation</text>
+<text x="1028" y="684" font-size="9" font-weight="500" fill="#334155">• Vessel Transit Time to Spill Estimation</text>
+<text x="1028" y="704" font-size="9" font-weight="500" fill="#334155">• Containment Boom Fleet Allocator</text>
+<text x="1028" y="724" font-size="9" font-weight="500" fill="#334155">• Tactical Resource Dispatch Vectors</text>
+<g filter="url(#card-shadow)">
+          <rect x="1292" y="150" width="256" height="160" rx="6" fill="#FFFFFF" stroke="#0F172A" stroke-width="1.5" />
+          <rect x="1292" y="150" width="6" height="160" rx="2" fill="#0F172A" />
+          <text x="1308" y="174" font-size="12" font-weight="800" fill="#0F172A">Tactical C2 Console</text>
+          <text x="1308" y="190" font-size="9.5" font-weight="600" fill="#64748B">Brutalist Command Interface</text>
+          <rect x="1460" y="160" width="78" height="18" rx="4" fill="#0F172A" opacity="0.12" />
+          <text x="1499" y="173" font-size="8.5" font-weight="800" fill="#0F172A" text-anchor="middle">Next.js 14</text>
+        </g>
+<text x="1308" y="214" font-size="9" font-weight="500" fill="#334155">• Real-Time Incident Status &amp; Clock Banner</text>
+<text x="1308" y="234" font-size="9" font-weight="500" fill="#334155">• 5-Step Evidence Chain Progress Matrix</text>
+<text x="1308" y="254" font-size="9" font-weight="500" fill="#334155">• Dynamic Scene Switching (Zenodo / Upload)</text>
+<text x="1308" y="274" font-size="9" font-weight="500" fill="#334155">• Contextual Intelligence Panel Breakdown</text>
+<g filter="url(#card-shadow)">
+          <rect x="1292" y="326" width="256" height="140" rx="6" fill="#FFFFFF" stroke="#0284C7" stroke-width="1.5" />
+          <rect x="1292" y="326" width="6" height="140" rx="2" fill="#0284C7" />
+          <text x="1308" y="350" font-size="12" font-weight="800" fill="#0F172A">Interactive Leaflet GIS</text>
+          <text x="1308" y="366" font-size="9.5" font-weight="600" fill="#64748B">Tactical Multi-Layer Visualization</text>
+          <rect x="1460" y="336" width="78" height="18" rx="4" fill="#0284C7" opacity="0.12" />
+          <text x="1499" y="349" font-size="8.5" font-weight="800" fill="#0284C7" text-anchor="middle">Cartography</text>
+        </g>
+<text x="1308" y="390" font-size="9" font-weight="500" fill="#334155">• Vector Slick Polygons &amp; Range Reticle</text>
+<text x="1308" y="410" font-size="9" font-weight="500" fill="#334155">• Suspect AIS Directional Chevrons</text>
+<text x="1308" y="430" font-size="9" font-weight="500" fill="#334155">• Lagrangian Drift Hindcast &amp; Forecast Cones</text>
+<text x="1308" y="450" font-size="9" font-weight="500" fill="#334155">• Port Proximity &amp; Response Intercept Vectors</text>
+<g filter="url(#card-shadow)">
+          <rect x="1292" y="482" width="256" height="136" rx="6" fill="#FFFFFF" stroke="#D97706" stroke-width="1.5" />
+          <rect x="1292" y="482" width="6" height="136" rx="2" fill="#D97706" />
+          <text x="1308" y="506" font-size="12" font-weight="800" fill="#0F172A">Investigation Replay</text>
+          <text x="1308" y="522" font-size="9.5" font-weight="600" fill="#64748B">Step-by-Step Playback Simulator</text>
+          <rect x="1460" y="492" width="78" height="18" rx="4" fill="#D97706" opacity="0.12" />
+          <text x="1499" y="505" font-size="8.5" font-weight="800" fill="#D97706" text-anchor="middle">Simulator</text>
+        </g>
+<text x="1308" y="546" font-size="9" font-weight="500" fill="#334155">• Step 1: SAR Sensor Observation at T0</text>
+<text x="1308" y="566" font-size="9" font-weight="500" fill="#334155">• Step 2: Backward Drift Hindcast to Origin</text>
+<text x="1308" y="586" font-size="9" font-weight="500" fill="#334155">• Step 3: AIS Vessel Spatio-Temporal Intercept</text>
+<text x="1308" y="606" font-size="9" font-weight="500" fill="#334155">• Step 4: Response Dispatch Routing Vectors</text>
+<g filter="url(#card-shadow)">
+          <rect x="1292" y="634" width="256" height="120" rx="6" fill="#FFFFFF" stroke="#DC2626" stroke-width="1.5" />
+          <rect x="1292" y="634" width="6" height="120" rx="2" fill="#DC2626" />
+          <text x="1308" y="658" font-size="12" font-weight="800" fill="#0F172A">7-Page Evidence Dossier</text>
+          <text x="1308" y="674" font-size="9.5" font-weight="600" fill="#64748B">Legal Chain of Custody Export</text>
+          <rect x="1460" y="644" width="78" height="18" rx="4" fill="#DC2626" opacity="0.12" />
+          <text x="1499" y="657" font-size="8.5" font-weight="800" fill="#DC2626" text-anchor="middle">Court-Ready</text>
+        </g>
+<text x="1308" y="698" font-size="9" font-weight="500" fill="#334155">• Automated PDF &amp; Print-Ready Incident Report</text>
+<text x="1308" y="718" font-size="9" font-weight="500" fill="#334155">• Forensic Proof Cards &amp; Kinematic CPA Tables</text>
+<text x="1308" y="738" font-size="9" font-weight="500" fill="#334155">• Official Action for Indian Coast Guard / NTRO</text>
+<g id="connectors">
+<path d="M 170 222 L 170 574" fill="none" stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="3 3" marker-end="url(#arrow)" />
+<path d="M 288 620 L 310 620 L 310 220 L 332 220" fill="none" stroke="#DC2626" stroke-width="2" marker-end="url(#arrow)" />
+<path d="M 288 640 L 320 640 L 320 380 L 332 380" fill="none" stroke="#0284C7" stroke-width="2" marker-end="url(#arrow-blue)" />
+<path d="M 288 660 L 332 660" fill="none" stroke="#7C3AED" stroke-width="2" marker-end="url(#arrow)" />
+<path d="M 288 438 L 332 500" fill="none" stroke="#059669" stroke-width="2" marker-end="url(#arrow-emerald)" />
+<path d="M 688 220 L 732 220" fill="none" stroke="#0D9488" stroke-width="2" marker-end="url(#arrow)" />
+<path d="M 688 380 L 732 380" fill="none" stroke="#D97706" stroke-width="2" marker-end="url(#arrow-amber)" />
+<path d="M 688 530 L 732 440" fill="none" stroke="#059669" stroke-width="2" marker-end="url(#arrow-emerald)" />
+<path d="M 968 240 L 1012 240" fill="none" stroke="#059669" stroke-width="2.5" marker-end="url(#arrow-emerald)" />
+<path d="M 968 440 L 1012 440" fill="none" stroke="#D97706" stroke-width="2" marker-end="url(#arrow-amber)" />
+<path d="M 968 640 L 1012 640" fill="none" stroke="#2563EB" stroke-width="2" marker-end="url(#arrow-blue)" />
+<path d="M 1248 240 L 1292 240" fill="none" stroke="#0F172A" stroke-width="2.5" marker-end="url(#arrow)" />
+<path d="M 1248 270 L 1270 270 L 1270 400 L 1292 400" fill="none" stroke="#0284C7" stroke-width="2" marker-end="url(#arrow-blue)" />
+<path d="M 1248 460 L 1270 460 L 1270 540 L 1292 540" fill="none" stroke="#D97706" stroke-width="2" marker-end="url(#arrow-amber)" />
+<path d="M 1248 640 L 1270 640 L 1270 690 L 1292 690" fill="none" stroke="#DC2626" stroke-width="2" marker-end="url(#arrow)" />
+</g>
+<g id="bottom-tech-stack">
+      <rect x="40" y="790" width="1520" height="84" rx="8" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.5" filter="url(#card-shadow)" />
+      
+      <!-- Box 1: Frontend & GIS -->
+      <g transform="translate(60, 802)">
+        <text x="0" y="16" font-size="11" font-weight="800" fill="#0F172A">FRONTEND &amp; GIS</text>
+        <text x="0" y="34" font-size="10" font-weight="600" fill="#2563EB">Next.js 14 • React 18 • TypeScript</text>
+        <text x="0" y="50" font-size="9.5" font-weight="500" fill="#64748B">Tailwind CSS • Leaflet GIS • Lucide Icons</text>
+      </g>
+      <line x1="420" y1="805" x2="420" y2="860" stroke="#E2E8F0" stroke-width="1.5" />
+
+      <!-- Box 2: Backend & APIs -->
+      <g transform="translate(440, 802)">
+        <text x="0" y="16" font-size="11" font-weight="800" fill="#0F172A">BACKEND &amp; MICROSERVICES</text>
+        <text x="0" y="34" font-size="10" font-weight="600" fill="#059669">Python 3.10 • FastAPI REST • Uvicorn</text>
+        <text x="0" y="50" font-size="9.5" font-weight="500" fill="#64748B">Pydantic v2 • Asyncio Task Queue • CORS</text>
+      </g>
+      <line x1="800" y1="805" x2="800" y2="860" stroke="#E2E8F0" stroke-width="1.5" />
+
+      <!-- Box 3: AI, Physics & Math -->
+      <g transform="translate(820, 802)">
+        <text x="0" y="16" font-size="11" font-weight="800" fill="#0F172A">AI, PHYSICS &amp; METOCEAN MATH</text>
+        <text x="0" y="34" font-size="10" font-weight="600" fill="#DC2626">PyTorch • ResNet-34 U-Net • Torchvision</text>
+        <text x="0" y="50" font-size="9.5" font-weight="500" fill="#64748B">SciPy RK4 ODE • OpenCV • NumPy • Albumentations</text>
+      </g>
+      <line x1="1200" y1="805" x2="1200" y2="860" stroke="#E2E8F0" stroke-width="1.5" />
+
+      <!-- Box 4: Geospatial & Hardware -->
+      <g transform="translate(1220, 802)">
+        <text x="0" y="16" font-size="11" font-weight="800" fill="#0F172A">DATA &amp; HARDWARE ACCELERATION</text>
+        <text x="0" y="34" font-size="10" font-weight="600" fill="#7C3AED">ESA Sentinel-1 SAR • CMEMS • NOAA AIS</text>
+        <text x="0" y="50" font-size="9.5" font-weight="500" fill="#64748B">NVIDIA CUDA GPU • GDAL • Rasterio • WGS-84</text>
+      </g>
+    </g>
+</svg>

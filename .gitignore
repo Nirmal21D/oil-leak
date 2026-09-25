@@ -3,12 +3,14 @@
 .env.local
 *.env
 
-# Data & Models
+# Large Data & Datasets
 data/
 backend/app/models/weights/*.pth
 backend/app/models/weights/*.pt
 *.7z
 *.zip
+*.tar.gz
+*.mp4
 
 # Python
 __pycache__/
@@ -29,11 +31,5 @@ frontend/build/
 .DS_Store
 *.log
 
-diagrams/
-*.mp4
-.gitignore
-*.png
-*.svg
-*.md
-*.jpg
-*.drawio
+# Scratch & Temporary
+scratch/

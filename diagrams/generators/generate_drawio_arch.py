@@ -1,0 +1,171 @@
+"""
+Generates an editable .drawio XML file for AegisSea system architecture.
+Can be directly opened in draw.io / diagrams.net.
+"""
+
+def generate_drawio_xml() -> str:
+    xml = []
+    xml.append('<mxfile host="app.diagrams.net" modified="2026-09-24T20:25:00.000Z" agent="AegisSea" version="21.0.0" type="device">')
+    xml.append('  <diagram id="aegissea-arch" name="AegisSea System Architecture">')
+    xml.append('    <mxGraphModel dx="1600" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="900" background="#FFFFFF" math="0" shadow="0">')
+    xml.append('      <root>')
+    xml.append('        <mxCell id="0" />')
+    xml.append('        <mxCell id="1" parent="0" />')
+
+    # Header
+    xml.append('        <mxCell id="header" value="&lt;b&gt;AEGISSEA // END-TO-END SYSTEM &amp;amp; FORENSIC ARCHITECTURE&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 11px;&quot;&gt;Smart India Hackathon 2026 • Team DevAlly&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0F172A;strokeColor=#0F172A;fontColor=#FFFFFF;fontSize=16;align=left;spacingLeft=20;" vertex="1" parent="1">')
+    xml.append('          <mxGeometry x="40" y="20" width="1520" height="50" as="geometry" />')
+    xml.append('        </mxCell>')
+
+    # 5 Swimlanes
+    lanes = [
+        ("lane1", 40, "1. INGESTION &amp; SENSORS", "Earth Observation &amp; Metocean Feeds", "#F8FAFC", 260),
+        ("lane2", 320, "2. AI &amp; PHYSICS ENGINES", "ResNet-34 U-Net &amp; Lagrangian RK4", "#F8FAFC", 380),
+        ("lane3", 720, "3. DATA &amp; STORAGE", "Geospatial Features &amp; Scenario Cache", "#F8FAFC", 260),
+        ("lane4", 1000, "4. API &amp; GATEWAY", "FastAPI Async Microservices", "#F8FAFC", 260),
+        ("lane5", 1280, "5. TACTICAL C2 &amp; DISPATCH", "Command Dashboard &amp; Legal Dossier", "#F8FAFC", 280),
+    ]
+
+    for lid, lx, ltitle, lsub, lbg, lw in lanes:
+        xml.append(f'        <mxCell id="{lid}" value="&lt;b&gt;{ltitle}&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 9px; color: #64748B;&quot;&gt;{lsub}&lt;/font&gt;" style="swimlane;startSize=40;rounded=1;whiteSpace=wrap;html=1;fillColor={lbg};strokeColor=#CBD5E1;fontColor=#1E293B;fontSize=12;align=left;spacingLeft=15;" vertex="1" parent="1">')
+        xml.append(f'          <mxGeometry x="{lx}" y="85" width="{lw}" height="680" as="geometry" />')
+        xml.append('        </mxCell>')
+
+    # Lane 1 boxes
+    xml.append('        <mxCell id="s1" value="&lt;b&gt;Sentinel-1 SAR C-Band&lt;/b&gt;&lt;br&gt;ESA Copernicus IW GRD • 10m GSD" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0F9FF;strokeColor=#0284C7;fontColor=#0F172A;align=left;spacingLeft=10;fontSize=11;" vertex="1" parent="lane1">')
+    xml.append('          <mxGeometry x="15" y="55" width="230" height="55" as="geometry" />')
+    xml.append('        </mxCell>')
+
+    xml.append('        <mxCell id="s2" value="&lt;b&gt;CMEMS Ocean Physics&lt;/b&gt;&lt;br&gt;Copernicus Surface Currents (u/v)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0FDFA;strokeColor=#0D9488;fontColor=#0F172A;align=left;spacingLeft=10;fontSize=11;" vertex="1" parent="lane1">')
+    xml.append('          <mxGeometry x="15" y="125" width="230" height="55" as="geometry" />')
+    xml.append('        </mxCell>')
+
+    xml.append('        <mxCell id="s3" value="&lt;b&gt;NOAA GFS Wind Fields&lt;/b&gt;&lt;br&gt;Global 10m Surface Wind Vectors" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EFF6FF;strokeColor=#2563EB;fontColor=#0F172A;align=left;spacingLeft=10;fontSize=11;" vertex="1" parent="lane1">')
+    xml.append('          <mxGeometry x="15" y="195" width="230" height="55" as="geometry" />')
+    xml.append('        </mxCell>')
+
+    xml.append('        <mxCell id="s4" value="&lt;b&gt;NOAA MarineCadastre AIS&lt;/b&gt;&lt;br&gt;Coastal &amp;amp; Satellite AIS Stream" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F5F3FF;strokeColor=#7C3AED;fontColor=#0F172A;align=left;spacingLeft=10;fontSize=11;" vertex="1" parent="lane1">')
+    xml.append('          <mxGeometry x="15" y="265" width="230" height="55" as="geometry" />')
+    xml.append('        </mxCell>')
+
+    xml.append('        <mxCell id="s5" value="&lt;b&gt;NGA World Port Index&lt;/b&gt;&lt;br&gt;Global Ports &amp;amp; Response Infrastructure" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFBEB;strokeColor=#D97706;fontColor=#0F172A;align=left;spacingLeft=10;fontSize=11;" vertex="1" parent="lane1">')
+    xml.append('          <mxGeometry x="15" y="335" width="230" height="55" as="geometry" />')
+    xml.append('        </mxCell>')
+
+    xml.append('        <mxCell id="s6" value="&lt;b&gt;Geodetic Preprocessing Tiler&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px; color: #475569;&quot;&gt;GDAL • Rasterio • WGS-84 Tiepoints&lt;br&gt;• 512×512 Sliding-Window Tiler&lt;br&gt;• Min-Max Dynamic Normalization&lt;br&gt;• Spatial Bounding-Box Filter&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#475569;fontColor=#0F172A;align=left;spacingLeft=10;fontSize=11;" vertex="1" parent="lane1">')
+    xml.append('          <mxGeometry x="15" y="415" width="230" height="150" as="geometry" />')
+    xml.append('        </mxCell>')
+
+    # Lane 2 boxes (AI & Physics)
+    xml.append('        <mxCell id="e1" value="&lt;b&gt;AI Segmentation Engine (ResNet-34 U-Net)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px; color: #DC2626;&quot;&gt;PyTorch • CUDA FP16 • 0.826 IoU Benchmark&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px; color: #334155;&quot;&gt;• Multi-class Oil vs Lookalike Classification&lt;br&gt;• Contour Vectorization (OpenCV)&lt;br&gt;• Metric Area (km²) &amp;amp; Centroid Derivation&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#DC2626;strokeWidth=2;fontColor=#0F172A;align=left;spacingLeft=12;fontSize=11;" vertex="1" parent="lane2">')
+    xml.append('          <mxGeometry x="15" y="55" width="350" height="135" as="geometry" />')
+    xml.append('        </mxCell>')
+
+    xml.append('        <mxCell id="e2" value="&lt;b&gt;Lagrangian Ocean Drift Engine (RK4)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px; color: #0284C7;&quot;&gt;4th-Order Runge-Kutta Hydrodynamic Solver&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px; color: #334155;&quot;&gt;• CMEMS Hourly Currents (u/v) + 3% Windage Drift&lt;br&gt;• Reverse Hindcasting to Spill Locus (T - 6.5h)&lt;br&gt;• 48h Forward Dispersion &amp;amp; Uncertainty Envelope&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0284C7;strokeWidth=2;fontColor=#0F172A;align=left;spacingLeft=12;fontSize=11;" vertex="1" parent="lane2">')
+    xml.append('          <mxGeometry x="15" y="205" width="350" height="135" as="geometry" />')
+    xml.append('        </mxCell>')
+
+    xml.append('        <mxCell id="e3" value="&lt;b&gt;Spatio-Temporal AIS Attribution&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px; color: #059669;&quot;&gt;Vessel Kinematic Correlation Engine&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px; color: #334155;&quot;&gt;• Closest Point of Approach (CPA) Calculator&lt;br&gt;• Temporal Intercept in Reconstructed Spill Locus&lt;br&gt;• Plain-English \'Why Flagged\' Evidence Verdict&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#059669;strokeWidth=2;fontColor=#0F172A;align=left;spacingLeft=12;fontSize=11;" vertex="1" parent="lane2">')
+    xml.append('          <mxGeometry x="15" y="355" width="350" height="135" as="geometry" />')
+    xml.append('        </mxCell>')
+
+    xml.append('        <mxCell id="e4" value="&lt;b&gt;Dark Target Correlator&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px; color: #7C3AED;&quot;&gt;Non-Cooperative Vessel Detection&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px; color: #334155;&quot;&gt;• SAR Radar Reflectivity vs AIS Transponders&lt;br&gt;• Flags Non-Reporting Dark Polluters&lt;br&gt;• Unregistered Discharge Source Attribution&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#7C3AED;strokeWidth=2;fontColor=#0F172A;align=left;spacingLeft=12;fontSize=11;" vertex="1" parent="lane2">')
+    xml.append('          <mxGeometry x="15" y="505" width="350" height="130" as="geometry" />')
+    xml.append('        </mxCell>')
+
+    # Lane 3 boxes (Data & Storage)
+    xml.append('        <mxCell id="db1" value="&lt;b&gt;GeoJSON &amp;amp; Spatial Store&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px; color: #0D9488;&quot;&gt;PostGIS Vector Geometry Store&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px; color: #334155;&quot;&gt;• Slick MultiPolygons&lt;br&gt;• Drift Trajectory Lines&lt;br&gt;• AIS Track Breadcrumbs&lt;br&gt;• NGA Port GIS Facilities&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0D9488;strokeWidth=1.5;fontColor=#0F172A;align=left;spacingLeft=10;fontSize=11;" vertex="1" parent="lane3">')
+    xml.append('          <mxGeometry x="15" y="55" width="230" height="150" as="geometry" />')
+    xml.append('        </mxCell>')
+
+    xml.append('        <mxCell id="db2" value="&lt;b&gt;In-Memory Scenario State&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px; color: #D97706;&quot;&gt;Active C2 Context Cache&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px; color: #334155;&quot;&gt;• Active Incident ID &amp;amp; Locus&lt;br&gt;• Ranked Suspects &amp;amp; CPA&lt;br&gt;• Real-time Telemetry Data&lt;br&gt;• Hot-Reload Replay Cache&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#D97706;strokeWidth=1.5;fontColor=#0F172A;align=left;spacingLeft=10;fontSize=11;" vertex="1" parent="lane3">')
+    xml.append('          <mxGeometry x="15" y="235" width="230" height="150" as="geometry" />')
+    xml.append('        </mxCell>')
+
+    xml.append('        <mxCell id="db3" value="&lt;b&gt;Model &amp;amp; Asset Registry&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px; color: #64748B;&quot;&gt;Weights &amp;amp; Baselines&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px; color: #334155;&quot;&gt;• PyTorch Checkpoints&lt;br&gt;• Zenodo Ground Truth Masks&lt;br&gt;• NGA WPI Vector Shapefiles&lt;br&gt;• Sub-Second Cold Start&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#64748B;strokeWidth=1.5;fontColor=#0F172A;align=left;spacingLeft=10;fontSize=11;" vertex="1" parent="lane3">')
+    xml.append('          <mxGeometry x="15" y="415" width="230" height="150" as="geometry" />')
+    xml.append('        </mxCell>')
+
+    # Lane 4 boxes (FastAPI Gateway)
+    xml.append('        <mxCell id="api1" value="&lt;b&gt;FastAPI Async Gateway&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px; color: #059669;&quot;&gt;Python 3.10 • REST Endpoints&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px; color: #334155;&quot;&gt;• POST /detect: U-Net Inference&lt;br&gt;• GET /scenario/current&lt;br&gt;• POST /drift: RK4 Simulation&lt;br&gt;• POST /attribution: AIS Ranker&lt;br&gt;• GET /dataset/scenes: Catalog&lt;br&gt;• Async Task Worker Queue&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#059669;strokeWidth=2;fontColor=#0F172A;align=left;spacingLeft=10;fontSize=11;" vertex="1" parent="lane4">')
+    xml.append('          <mxGeometry x="15" y="55" width="230" height="180" as="geometry" />')
+    xml.append('        </mxCell>')
+
+    xml.append('        <mxCell id="api2" value="&lt;b&gt;Pydantic v2 Serialization&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px; color: #0284C7;&quot;&gt;Data Validation Contracts&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px; color: #334155;&quot;&gt;• Scenario Payload Validation&lt;br&gt;• Base64 Data URL Sanitizer&lt;br&gt;• GeoJSON RFC Compliance&lt;br&gt;• Robust HTTP Error Handlers&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0284C7;strokeWidth=1.5;fontColor=#0F172A;align=left;spacingLeft=10;fontSize=11;" vertex="1" parent="lane4">')
+    xml.append('          <mxGeometry x="15" y="260" width="230" height="140" as="geometry" />')
+    xml.append('        </mxCell>')
+
+    xml.append('        <mxCell id="api3" value="&lt;b&gt;Response Route Dispatcher&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px; color: #2563EB;&quot;&gt;NGA WPI Routing Solver&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px; color: #334155;&quot;&gt;• Nearest Port Identification&lt;br&gt;• Geodesic Intercept Distance&lt;br&gt;• Vessel ETA Estimation&lt;br&gt;• Boom Fleet Dispatch Vector&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#2563EB;strokeWidth=1.5;fontColor=#0F172A;align=left;spacingLeft=10;fontSize=11;" vertex="1" parent="lane4">')
+    xml.append('          <mxGeometry x="15" y="425" width="230" height="140" as="geometry" />')
+    xml.append('        </mxCell>')
+
+    # Lane 5 boxes (C2 & Operations)
+    xml.append('        <mxCell id="c21" value="&lt;b&gt;Tactical C2 Dashboard&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px; color: #0F172A;&quot;&gt;Next.js 14 • React 18 • TypeScript&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px; color: #334155;&quot;&gt;• Real-time Incident C2 Status&lt;br&gt;• 5-Step Evidence Chain Banner&lt;br&gt;• Dynamic Multi-Scene Switcher&lt;br&gt;• Contextual Intel Panel View&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0F172A;strokeWidth=2;fontColor=#0F172A;align=left;spacingLeft=10;fontSize=11;" vertex="1" parent="lane5">')
+    xml.append('          <mxGeometry x="15" y="55" width="250" height="140" as="geometry" />')
+    xml.append('        </mxCell>')
+
+    xml.append('        <mxCell id="c22" value="&lt;b&gt;Interactive Leaflet GIS&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px; color: #0284C7;&quot;&gt;Tactical Multi-Layer Cartography&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px; color: #334155;&quot;&gt;• Slick Contours &amp;amp; Range Rings&lt;br&gt;• Suspect AIS Directional Chevrons&lt;br&gt;• Drift Hindcast &amp;amp; Forecast Cones&lt;br&gt;• Port Proximity Vectors&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0284C7;strokeWidth=1.5;fontColor=#0F172A;align=left;spacingLeft=10;fontSize=11;" vertex="1" parent="lane5">')
+    xml.append('          <mxGeometry x="15" y="215" width="250" height="135" as="geometry" />')
+    xml.append('        </mxCell>')
+
+    xml.append('        <mxCell id="c23" value="&lt;b&gt;Investigation Replay Engine&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px; color: #D97706;&quot;&gt;Step-by-Step Playback Simulator&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px; color: #334155;&quot;&gt;• T0 Observation ➔ Drift Hindcast&lt;br&gt;• AIS Intercept ➔ Response Dispatch&lt;br&gt;• Automated Judge-Ready Flow&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#D97706;strokeWidth=1.5;fontColor=#0F172A;align=left;spacingLeft=10;fontSize=11;" vertex="1" parent="lane5">')
+    xml.append('          <mxGeometry x="15" y="370" width="250" height="120" as="geometry" />')
+    xml.append('        </mxCell>')
+
+    xml.append('        <mxCell id="c24" value="&lt;b&gt;7-Page Legal Evidence Dossier&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px; color: #DC2626;&quot;&gt;Court-Admissible PDF Export&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px; color: #334155;&quot;&gt;• Complete Satellite Provenance&lt;br&gt;• Kinematic Proof Cards &amp;amp; CPA&lt;br&gt;• Actionable for Indian Coast Guard&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#DC2626;strokeWidth=2;fontColor=#0F172A;align=left;spacingLeft=10;fontSize=11;" vertex="1" parent="lane5">')
+    xml.append('          <mxGeometry x="15" y="510" width="250" height="125" as="geometry" />')
+    xml.append('        </mxCell>')
+
+    # Bottom Tech Stack Ribbon
+    xml.append('        <mxCell id="tech_ribbon" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#CBD5E1;strokeWidth=1.5;" vertex="1" parent="1">')
+    xml.append('          <mxGeometry x="40" y="785" width="1520" height="85" as="geometry" />')
+    xml.append('        </mxCell>')
+
+    xml.append('        <mxCell id="t1" value="&lt;b&gt;FRONTEND &amp;amp; GIS&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;color: #2563EB; font-size: 11px;&quot;&gt;Next.js 14 • React 18 • TypeScript&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;color: #64748B; font-size: 10px;&quot;&gt;Tailwind CSS • Leaflet GIS • Lucide Icons&lt;/font&gt;" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">')
+    xml.append('          <mxGeometry x="60" y="792" width="340" height="70" as="geometry" />')
+    xml.append('        </mxCell>')
+
+    xml.append('        <mxCell id="t2" value="&lt;b&gt;BACKEND &amp;amp; MICROSERVICES&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;color: #059669; font-size: 11px;&quot;&gt;Python 3.10 • FastAPI REST • Uvicorn&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;color: #64748B; font-size: 10px;&quot;&gt;Pydantic v2 • Asyncio Task Queue • CORS&lt;/font&gt;" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">')
+    xml.append('          <mxGeometry x="440" y="792" width="340" height="70" as="geometry" />')
+    xml.append('        </mxCell>')
+
+    xml.append('        <mxCell id="t3" value="&lt;b&gt;AI, PHYSICS &amp;amp; METOCEAN MATH&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;color: #DC2626; font-size: 11px;&quot;&gt;PyTorch • ResNet-34 U-Net • Torchvision&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;color: #64748B; font-size: 10px;&quot;&gt;SciPy RK4 ODE • OpenCV • NumPy • Albumentations&lt;/font&gt;" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">')
+    xml.append('          <mxGeometry x="820" y="792" width="360" height="70" as="geometry" />')
+    xml.append('        </mxCell>')
+
+    xml.append('        <mxCell id="t4" value="&lt;b&gt;DATA &amp;amp; HARDWARE ACCELERATION&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;color: #7C3AED; font-size: 11px;&quot;&gt;ESA Sentinel-1 SAR • CMEMS • NOAA AIS&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;color: #64748B; font-size: 10px;&quot;&gt;NVIDIA CUDA GPU • GDAL • Rasterio • WGS-84&lt;/font&gt;" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">')
+    xml.append('          <mxGeometry x="1220" y="792" width="320" height="70" as="geometry" />')
+    xml.append('        </mxCell>')
+
+    # Connectors
+    conns = [
+        ("s6", "e1", "#DC2626"),
+        ("s6", "e2", "#0284C7"),
+        ("e1", "db1", "#0D9488"),
+        ("e2", "db1", "#D97706"),
+        ("e3", "db2", "#059669"),
+        ("db1", "api1", "#059669"),
+        ("db2", "api1", "#D97706"),
+        ("api1", "c21", "#0F172A"),
+        ("api1", "c22", "#0284C7"),
+        ("api1", "c24", "#DC2626"),
+    ]
+
+    for idx, (src, dst, col) in enumerate(conns):
+        xml.append(f'        <mxCell id="edge_{idx}" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor={col};strokeWidth=2;" edge="1" parent="1" source="{src}" target="{dst}">')
+        xml.append('          <mxGeometry relative="1" as="geometry" />')
+        xml.append('        </mxCell>')
+
+    xml.append('      </root>')
+    xml.append('    </mxGraphModel>')
+    xml.append('  </diagram>')
+    xml.append('</mxfile>')
+    return '\n'.join(xml)
+
+if __name__ == '__main__':
+    content = generate_drawio_xml()
+    with open('c:/Nirmal/oil-leak/architecture_diagram.drawio', 'w', encoding='utf-8') as f:
+        f.write(content)
+    with open('c:/Nirmal/oil-leak/frontend/public/architecture_diagram.drawio', 'w', encoding='utf-8') as f:
+        f.write(content)
+    print("Draw.io XML generated successfully at c:/Nirmal/oil-leak/architecture_diagram.drawio")
