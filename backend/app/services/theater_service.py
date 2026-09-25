@@ -29,7 +29,7 @@ class TheaterService:
         key_oil_scenes = [
             {
                 "scene_id": "00111",
-                "name": "Mississippi Canyon Spill (Golden Scenario)",
+                "name": "Gulf of Mexico OCS (Benchmark Scene 00111)",
                 "theater": "Gulf of Mexico // US EEZ",
                 "category": "VERIFIED OIL SCENE",
                 "lat": 28.9668,
@@ -40,7 +40,7 @@ class TheaterService:
                 "acquisition_date": "2023-07-20T23:54:28Z",
                 "sensor": "Sentinel-1A C-SAR",
                 "preset_id": "00111",
-                "description": "Verified crude discharge detected in Mississippi Canyon sector, 78 km SE of Southwest Pass. Full CMEMS Lagrangian hindcast, NOAA historical AIS, and NGA WPI response routing active."
+                "description": "Verified crude discharge detected in Gulf of Mexico Outer Continental Shelf sector, 78 km SE of Southwest Pass. Full CMEMS Lagrangian hindcast, historical AIS, and NGA WPI response routing active."
             },
             {
                 "scene_id": "00000",

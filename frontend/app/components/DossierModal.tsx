@@ -79,7 +79,7 @@ export default function DossierModal({
               </span>
             </div>
             <h2 className="text-sm sm:text-base font-black tracking-tight text-concrete-100 font-display uppercase mt-0.5">
-              MARITIME INCIDENT EVIDENCE & INVESTIGATION DOSSIER // {scenarioData?.incident_id || 'AEGIS-2018-MC20-00111'}
+              MARITIME INCIDENT EVIDENCE & INVESTIGATION DOSSIER // {scenarioData?.incident_id || 'AEGIS-2023-GOM-00111'}
             </h2>
           </div>
 
@@ -143,7 +143,7 @@ export default function DossierModal({
                 </h1>
               </div>
               <div className="text-right text-[11px] text-concrete-400 font-mono print:text-black">
-                <div>DOSSIER ID: <strong className="text-concrete-200 print:text-black">{scenarioData?.incident_id || 'AEGIS-2018-MC20-00111'}</strong></div>
+                <div>DOSSIER ID: <strong className="text-concrete-200 print:text-black">{scenarioData?.incident_id || 'AEGIS-2023-GOM-00111'}</strong></div>
                 <div>GENERATED: <strong>{new Date().toISOString()}</strong></div>
               </div>
             </div>
@@ -838,7 +838,7 @@ export default function DossierModal({
 
                 <div className="border-b border-concrete-800 pb-1.5">
                   <div className="flex justify-between text-concrete-400">
-                    <span>2. HISTORICAL AIS ARCHIVE (00111_mc20_historical_ais.csv)</span>
+                    <span>2. HISTORICAL AIS ARCHIVE (00111_gom_historical_ais.csv)</span>
                     <span className="text-emerald-400 font-bold">VERIFIED NOAA MARINECADASTRE</span>
                   </div>
                   <div className="text-concrete-200 font-bold break-all">

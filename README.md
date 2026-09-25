@@ -711,7 +711,7 @@ c:\Nirmal\oil-leak\
 │   ├── 01_Train_Val_No_Oil_Images/        # Clean ocean background scenes
 │   ├── 02_Test_images_and_ground_truth/   # Held-out Part III test benchmark
 │   └── historical_ais/                    # NOAA MarineCadastre verified AIS archives
-│       └── 00111_mc20_historical_ais.csv  # Historical AIS sample benchmark archive
+│       └── 00111_gom_historical_ais.csv   # Historical AIS sample benchmark archive
 │
 ├── diagrams/                              # Architecture schematics, flowcharts & presentation assets
 ├── scripts/                               # Evaluation, benchmarking & verification scripts

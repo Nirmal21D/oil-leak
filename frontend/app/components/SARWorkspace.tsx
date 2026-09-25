@@ -162,7 +162,7 @@ export default function SARWorkspace({
                 {selectedFile ? selectedFile.name : '[ CLICK OR DROP SENTINEL-1 SAR IMAGE (.PNG, .TIF) ]'}
               </div>
               <p className="text-[10px] text-concrete-500">
-                Supports Sentinel-1 IW swath GeoTIFF & PNG crops (MC20 corridor 00111.tif)
+                Supports Sentinel-1 IW swath GeoTIFF & PNG crops (GOM corridor 00111.tif)
               </p>
             </label>
           </div>
