@@ -1,6 +1,22 @@
-version: '3.8'
-
 services:
+  postgis:
+    image: postgis/postgis:15-3.3-alpine
+    container_name: aegissea_postgis
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+      POSTGRES_DB: oilleak_db
+    volumes:
+      - postgis_data:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5432:5432"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
   backend:
     build:
       context: .
@@ -15,6 +31,14 @@ services:
     environment:
       - FASTAPI_ENV=production
       - API_PORT=8000
+      - DATABASE_URL=postgresql://postgres:postgrespassword@postgis:5432/oilleak_db
+    depends_on:
+      - postgis
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   frontend:
     build:
@@ -28,3 +52,11 @@ services:
       - NODE_ENV=production
     depends_on:
       - backend
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  postgis_data:
